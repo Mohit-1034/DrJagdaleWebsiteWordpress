@@ -128,18 +128,6 @@ if ( ! function_exists( 'orto_child_get_nav_groups' ) ) {
 						),
 					),
 
-					array(
-						'slug'  => 'elbow-pain',
-						'title' => __( 'Elbow Pain Treatment', 'orto' ),
-						'icon'  => 'elbow',
-						'text'  => __( 'Tennis elbow rarely comes from tennis. It comes from work - and it responds well to the right combination of rest, therapy and injection.', 'orto' ),
-						'items' => array(
-							__( 'Tennis elbow', 'orto' ),
-							__( 'Golfer\'s elbow', 'orto' ),
-							__( 'Elbow fractures and dislocation', 'orto' ),
-							__( 'Cubital tunnel syndrome', 'orto' ),
-						),
-					),
 
 					array(
 						'slug'  => 'back-neck-pain',

@@ -106,9 +106,11 @@ while ( have_posts() ) {
 				<div class="djo_split">
 
 					<div class="djo_split_media">
-						<?php $djo_about_image = orto_child_image_url( 'clinic-entrance' ); ?>
+						<?php $djo_about_image = orto_child_image_url( 'doctor' ); ?>
 						<?php if ( $djo_about_image ) { ?>
-							<img src="<?php echo esc_url( $djo_about_image ); ?>" alt="<?php esc_attr_e( 'The entrance to the clinic in Destination Center 1, Nanded City', 'orto' ); ?>" loading="lazy" decoding="async">
+							<img src="<?php echo esc_url( $djo_about_image ); ?>"
+								alt="<?php echo esc_attr( sprintf( /* translators: %s: the surgeon's name. */ __( '%s at the clinic', 'orto' ), $djo_business['doctor'] ) ); ?>"
+								width="900" height="1126" loading="lazy" decoding="async">
 						<?php } ?>
 					</div>
 

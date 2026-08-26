@@ -7,7 +7,8 @@
  * The order is the order a patient needs it in:
  *
  *   1. Hero          - who this is, where it is, and how to be seen today.
- *   2. Trust strip   - the four facts that answer "is this the right place".
+ *   2. Trust strip   - the four facts that answer "is this the right place",
+ *                     on a panel straddling the join below the hero.
  *   3. Speciality    - "which part of me hurts", the way people actually arrive.
  *   4. About         - the surgeon, briefly, with the credentials that matter.
  *   5. Conditions    - "what is it called", for the visitor who arrives with a
@@ -120,8 +121,11 @@ get_header();
 	<?php /* ---------------------------------------------------------------
 	 * 2. Trust strip
 	 *
-	 * Four facts, lifted clear of the hero so they read as the answer to "is
-	 * this the right place" before the visitor has to scroll for it.
+	 * Four facts on a white panel that is pulled up into the hero, so it
+	 * straddles the join between the dark band and the light one below it. The
+	 * overlap is the point: it lifts the four things a visitor most needs to
+	 * know out of the hero and sets them on the page, where they are read before
+	 * anything has to be scrolled for.
 	 * ------------------------------------------------------------------- */ ?>
 	<section class="djo_trust">
 		<div class="content_wrap">
@@ -200,9 +204,11 @@ get_header();
 			<div class="djo_split">
 
 				<div class="djo_split_media">
-					<?php $djo_about_image = orto_child_image_url( 'clinic-signage' ); ?>
+					<?php $djo_about_image = orto_child_image_url( 'doctor' ); ?>
 					<?php if ( $djo_about_image ) { ?>
-						<img src="<?php echo esc_url( $djo_about_image ); ?>" alt="<?php echo esc_attr( $djo_business['name'] ); ?>" loading="lazy" decoding="async">
+						<img src="<?php echo esc_url( $djo_about_image ); ?>"
+							alt="<?php echo esc_attr( sprintf( /* translators: %s: the surgeon's name. */ __( '%s at the clinic', 'orto' ), $djo_business['doctor'] ) ); ?>"
+							width="900" height="1126" loading="lazy" decoding="async">
 					<?php } ?>
 				</div>
 
@@ -446,18 +452,62 @@ get_header();
 			);
 			?>
 
-			<ul class="djo_reviews_grid">
-				<?php foreach ( orto_child_get_reviews() as $djo_review ) { ?>
-					<li class="djo_review">
-						<?php echo orto_child_stars( $djo_review['rating'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-						<blockquote class="djo_review_text"><p><?php echo esc_html( $djo_review['text'] ); ?></p></blockquote>
-						<p class="djo_review_by">
-							<span class="djo_review_name"><?php echo esc_html( $djo_review['name'] ); ?></span>
-							<span class="djo_review_for"><?php echo esc_html( $djo_review['for'] ); ?></span>
-						</p>
-					</li>
-				<?php } ?>
-			</ul>
+			<?php
+			/*
+			 * The reviews roll continuously rather than sitting in a grid.
+			 *
+			 * How it loops seamlessly: the set is printed TWICE into one flex
+			 * track, and the track is animated from 0 to -50% of its own width.
+			 * At -50% the second copy is sitting exactly where the first one
+			 * started, so the animation can snap back to 0 without anything
+			 * appearing to move. That is the whole trick - no script, no
+			 * measuring, and it survives any number of reviews.
+			 *
+			 * The second copy is aria-hidden and its links, if any are ever
+			 * added, are taken out of the tab order: a screen reader should hear
+			 * three reviews, not six.
+			 *
+			 * It pauses on hover and on keyboard focus, because text that will
+			 * not hold still is text nobody can finish reading. It does not
+			 * animate at all under prefers-reduced-motion - see style.css, where
+			 * the track falls back to a normal scrollable row.
+			 */
+			$djo_reviews = orto_child_get_reviews();
+			?>
+			<div class="djo_marquee" data-djo-marquee>
+				<ul class="djo_marquee_track">
+					<?php foreach ( array( false, true ) as $djo_review_clone ) { ?>
+						<?php foreach ( $djo_reviews as $djo_review ) { ?>
+							<li class="djo_review"<?php echo $djo_review_clone ? ' aria-hidden="true"' : ''; ?>>
+								<span class="djo_review_mark" aria-hidden="true">&ldquo;</span>
+
+								<div class="djo_review_head">
+									<?php echo orto_child_stars( $djo_review['rating'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+									<span class="djo_review_source"><?php esc_html_e( 'Google', 'orto' ); ?></span>
+								</div>
+
+								<blockquote class="djo_review_text"><p><?php echo esc_html( $djo_review['text'] ); ?></p></blockquote>
+
+								<p class="djo_review_by">
+									<?php
+									/*
+									 * An initial rather than a photograph. The clinic has no
+									 * portrait of any of these patients and never should - but
+									 * an attribution with something in front of it reads as a
+									 * person, where a bare name reads as a caption.
+									 */
+									?>
+									<span class="djo_review_avatar" aria-hidden="true"><?php echo esc_html( mb_substr( $djo_review['name'], 0, 1 ) ); ?></span>
+									<span class="djo_review_by_text">
+										<span class="djo_review_name"><?php echo esc_html( $djo_review['name'] ); ?></span>
+										<span class="djo_review_for"><?php echo esc_html( $djo_review['for'] ); ?></span>
+									</span>
+								</p>
+							</li>
+						<?php } ?>
+					<?php } ?>
+				</ul>
+			</div>
 		</div>
 	</section>
 

@@ -91,6 +91,134 @@ body.scheme_default {
 }
 
 
+/* Box model
+   ------------------------------------------------------------
+   The Orto parent theme does not set a global border-box, so an element sized
+   with `height: 100%` and given padding overflows its own box by the padding.
+
+   That is what was wrong with the Speciality and Services grids. Both cards
+   carry `height: 100%` so the row comes out level, and both carry about 32px of
+   vertical padding - so each card rendered 65px taller than the grid cell
+   holding it, swallowed the 23px gap, and overlapped the row beneath by 42px.
+   The rows appeared welded together with a doubled border between them.
+
+   Fixed here rather than by adding `box-sizing` to the two cards that showed
+   it: every component in this stylesheet is named djo_*, any of them can be
+   given a height and a padding tomorrow, and this makes all of them behave the
+   way the rest of the web already does. The attribute selectors match both a
+   lone class and one in a list.
+
+   Scoped to djo_* on purpose - a blanket `*, *::before, *::after` reset would
+   also re-measure every element the parent theme ships, and a theme this large
+   has components that were built expecting content-box.
+------------------------------------------------------------ */
+
+[class^="djo_"],
+[class*=" djo_"] {
+	box-sizing: border-box;
+}
+
+
+/* Motion
+   ------------------------------------------------------------
+   Every hover on the site is built from the same four moves, so that a page
+   full of interactions still reads as one object rather than a shelf of
+   different widgets:
+
+     LIFT    the thing rises a little and its shadow deepens - used for
+             anything card-shaped, which is the gesture people already read as
+             "this is a surface you can pick up".
+     TILT    an icon rotates a few degrees and grows slightly. Never a spin: a
+             full rotation is a loading spinner, and at 40px a 360 read as a
+             glitch. Between 6 and 10 degrees is enough to say "alive".
+     WIPE    a rule or a bar grows from one edge, scaled on a single axis from
+             a transform-origin - underlines, accent bars, the sheen on a
+             button. Transform only, so it never triggers layout.
+     NUDGE   the whole row slides a few pixels towards where the link goes.
+             Directional: right for a forward link, up for a jump to a section.
+
+   Two easings and nothing else. --djo-ease settles; --djo-spring overshoots by
+   a hair and comes back, and is kept for the things that should feel physical
+   (icons, the numerals in the symptoms list).
+
+   Everything here is transform and opacity. Nothing animates a property that
+   costs layout, so nothing here can make a scroll janky.
+
+   All of it is turned off under prefers-reduced-motion at the end of this
+   file - not softened, off. Someone who has asked their operating system to
+   stop moving things has asked once, for everything.
+------------------------------------------------------------ */
+
+:root,
+.scheme_default,
+body.scheme_default {
+	--djo-ease: cubic-bezier(.22, .61, .36, 1);
+	--djo-spring: cubic-bezier(.34, 1.56, .64, 1);
+	--djo-fast: .22s;
+	--djo-base: .32s;
+	--djo-slow: .5s;
+}
+
+/* ---------- WIPE: the sheen on a solid button ----------
+   A band of light sweeping across the face. It lives on a pseudo-element with
+   the button clipping it, so no extra markup and nothing to escape the pill. */
+.djo_button {
+	position: relative;
+	overflow: hidden;
+	isolation: isolate;
+}
+
+.djo_button_solid::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: -60%;
+	z-index: -1;
+	width: 45%;
+	background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+	transform: skewX(-18deg);
+	transition: left var(--djo-slow) var(--djo-ease);
+}
+
+.djo_button_solid:hover::before,
+.djo_button_solid:focus-visible::before {
+	left: 125%;
+}
+
+/* On a dark band the solid button is white, so a white sheen is invisible.
+   The light becomes a shadow instead - the same gesture, inverted. */
+.djo_band_dark .djo_button_solid::before,
+.djo_band_deep .djo_button_solid::before {
+	background: linear-gradient(100deg, transparent, rgba(16, 25, 43, 0.16), transparent);
+}
+
+/* The icon inside any button leans towards where the button goes. */
+.djo_button svg {
+	transition: transform var(--djo-base) var(--djo-spring);
+}
+
+.djo_button:hover svg,
+.djo_button:focus-visible svg {
+	transform: translateX(3px) rotate(-8deg);
+}
+
+/* ---------- TILT: the shared icon behaviour ----------
+   Applied from the component, not from here, so each one can choose its own
+   direction - but the timing is set once so they all move at the same rate. */
+.djo_icon,
+.djo_card_icon,
+.djo_service_icon,
+.djo_rail_icon,
+.djo_entry_icon,
+.djo_value_icon,
+.djo_mega_item_icon,
+.djo_jump_icon {
+	transition: transform var(--djo-base) var(--djo-spring),
+		background-color var(--djo-base) var(--djo-ease);
+}
+
+
 /* Full-width bands
    ------------------------------------------------------------
    Every section that carries a background is one of these. The band runs the
@@ -943,6 +1071,20 @@ body.home.djo_header_stuck .top_panel_default {
 	transform: translateX(4px);
 }
 
+/* The parent theme marks any item with children by appending a fontello caret
+   to a::after (skins/default/css/style.css, content: '\e828'). Two things are
+   wrong with it here. It is drawn over the last letter rather than after it -
+   the y of Speciality and the s of Services both came out looking struck
+   through - and it announces a dropdown that, on desktop, never opens: the mega
+   panel opens instead.
+
+   Hidden for the bar only. The mobile menu is a different template with a
+   different container, and there the caret is a real disclosure control that
+   still has to be there. */
+.djo_bar_menu .sc_layouts_menu_nav > li.menu-item-has-children > a::after {
+	display: none;
+}
+
 /* The mega panel replaces the theme's own dropdown for these two items. The
    sub-items are still real menu children - that is what gives the mobile menu
    something to expand - so the parent's dropdown has to be told to stay shut
@@ -1192,8 +1334,11 @@ body.home .page_content_wrap {
 }
 
 /* ---------- Trust strip ----------
-   Lifted over the join between the hero and the page below it, so it reads as
-   the answer to "is this the right place" before the visitor has to scroll. */
+   Four facts on a white panel pulled up into the hero, so it straddles the join
+   between the dark band and the light one below. The overlap is deliberate: it
+   lifts the four things a visitor most needs to know out of the hero and sets
+   them on the page, where they are read before anything is scrolled for.
+------------------------------------------------------------ */
 
 .djo_trust {
 	position: relative;
@@ -1210,7 +1355,10 @@ body.home .page_content_wrap {
 	padding: 0;
 	overflow: hidden;
 	border-radius: var(--djo-radius);
-	background-color: var(--theme-color-bd_color);
+	/* The 1px grid gap shows through as the dividing rules - one background
+	   behind the row rather than a border on each cell, which is what keeps the
+	   rules from doubling where two cells meet. */
+	background-color: var(--djo-rule);
 	box-shadow: var(--djo-shadow-lift);
 }
 
@@ -1219,7 +1367,7 @@ body.home .page_content_wrap {
 	flex-direction: column;
 	gap: 6px;
 	padding: clamp(22px, 2.4vw, 34px) clamp(18px, 2vw, 28px);
-	background-color: #ffffff;
+	background-color: var(--djo-paper);
 	text-align: center;
 }
 
@@ -1326,19 +1474,28 @@ body.home .page_content_wrap {
 	box-shadow: none;
 }
 
+/* The media column is narrower than the copy: the photograph is a portrait now,
+   and a portrait given equal width to the prose becomes the subject of the
+   section rather than the person the section is about. */
 .djo_split {
 	display: grid;
-	grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+	grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
 	gap: clamp(30px, 4vw, 64px);
 	align-items: center;
 }
 
-/* A fixed band rather than whatever proportions the file happens to have. The
-   photographs here are phone snaps of the clinic, and a portrait one left to its
-   natural height ran to twice the depth of the prose beside it and turned the
-   section into a picture with a caption. object-fit crops to the band instead. */
+/* A 4:5 portrait frame. This band carries the surgeon's own photograph, and a
+   person belongs in a portrait - the landscape band it used to be cut his head
+   off at the top and filled the rest with a door.
+
+   aspect-ratio rather than a fixed height: the frame then scales with the
+   column instead of being pinned to a viewport measurement, so the photograph
+   holds its proportions from a phone to a wide monitor. The height is still
+   capped, because at the widest layouts a free 4:5 would run deeper than the
+   prose beside it and unbalance the split again. */
 .djo_split_media {
 	overflow: hidden;
+	max-height: 520px;
 	border-radius: var(--djo-radius);
 	box-shadow: var(--djo-shadow);
 }
@@ -1346,8 +1503,12 @@ body.home .page_content_wrap {
 .djo_split_media img {
 	display: block;
 	width: 100%;
-	height: clamp(260px, 26vw, 380px);
+	height: 100%;
+	aspect-ratio: 4 / 5;
+	/* Slightly above centre: his face sits in the upper half of the frame, and a
+	   centred crop takes the chin off first at narrow widths. */
 	object-fit: cover;
+	object-position: center 30%;
 }
 
 .djo_split_title {
@@ -1734,39 +1895,129 @@ body.home .page_content_wrap {
 
 /* ---------- Reviews ---------- */
 
-.djo_reviews_grid {
-	display: grid;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
+/* ---------- The rolling reviews ----------
+   Markup: front-page.php, which prints the set twice into one track.
+
+   The track is animated from 0 to -50% of its own width. At -50% the second
+   copy is sitting exactly where the first one started, so the keyframe can snap
+   back to 0 and nothing appears to move. No script, no measuring, and it works
+   for any number of reviews.
+
+   The band is the clipping frame, and it fades at both ends so cards enter and
+   leave rather than being cut off by the edge of the screen. Same trick as the
+   spine watermark: a mask, so the fade works over whatever the band's ground
+   happens to be. */
+.djo_marquee {
+	position: relative;
+	/* Breaks out of the container to the full window: a marquee that stops at
+	   the page measure has two hard edges in the middle of the screen, and the
+	   whole point is that the row continues past what you can see. */
+	width: 100vw;
+	margin-right: calc(-50vw + 50%);
+	margin-left: calc(-50vw + 50%);
+	overflow: hidden;
+	-webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+	mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+}
+
+@keyframes djo_roll {
+	from { transform: translate3d(0, 0, 0); }
+	to   { transform: translate3d(-50%, 0, 0); }
+}
+
+.djo_marquee_track {
+	display: flex;
+	width: max-content;
 	gap: clamp(16px, 1.8vw, 28px);
 	list-style: none;
 	margin: 0;
-	padding: 0;
+	padding: 4px 0;
+	animation: djo_roll 46s linear infinite;
+	/* Its own layer, so 46 seconds of continuous movement is composited rather
+	   than repainted. */
+	will-change: transform;
 }
+
+/* Paused while anyone is reading it - by pointer or by keyboard. Text that will
+   not hold still is text nobody can finish. */
+.djo_marquee:hover .djo_marquee_track,
+.djo_marquee:focus-within .djo_marquee_track {
+	animation-play-state: paused;
+}
+
+/* Each card is a fixed width in the track. flex:0 0 rather than a percentage,
+   because the track is `width: max-content` and has no width for a percentage
+   to resolve against. */
+.djo_marquee .djo_review {
+	flex: 0 0 clamp(300px, 26vw, 390px);
+}
+
+
+/* ---------- A review card ----------
+   A quotation mark watermark, a head row carrying the stars and where the
+   review came from, the quotation, and an attribution on the card's bottom
+   edge. The bottom edge matters: three reviews of different lengths still have
+   to sign off on one line, or the row looks broken as it rolls past.
+------------------------------------------------------------ */
 
 .djo_review {
+	position: relative;
 	display: flex;
 	flex-direction: column;
-	padding: clamp(24px, 2.4vw, 34px);
+	overflow: hidden;
+	padding: clamp(26px, 2.4vw, 34px);
+	border: 1px solid var(--djo-rule-dark);
 	border-radius: var(--djo-radius);
-	background-color: #ffffff;
-	box-shadow: var(--djo-shadow);
+	background-color: var(--djo-card-dark);
+	transition: transform var(--djo-base) var(--djo-ease),
+		border-color var(--djo-base) var(--djo-ease),
+		background-color var(--djo-base) var(--djo-ease);
 }
 
-/* The long selector is doing real work. The parent theme gives every
-   blockquote `padding: 3.2em 2.6em` - about 50px by 40px at this font size -
-   which is right for a pull quote set into an article and wrong inside a card
-   that already has padding of its own: it inset the quotation another 40px from
-   the stars above it and left the text floating in the middle of the card.
-   A bare `.djo_review_text` loses to it, so this matches on the element as well
-   as the class. The border and background go with it for the same reason. */
+/* The quotation mark, set large and very quiet in the top-right corner. It is
+   a decoration, so it is a pseudo-content span the screen reader never sees -
+   and it grows and brightens on hover, which is most of what tells you the card
+   is responding at all inside a row that is already moving. */
+.djo_review_mark {
+	position: absolute;
+	top: -18px;
+	right: 6px;
+	color: #ffffff;
+	font-size: 120px;
+	line-height: 1;
+	opacity: 0.06;
+	transition: opacity var(--djo-base) var(--djo-ease), transform var(--djo-base) var(--djo-spring);
+	pointer-events: none;
+	user-select: none;
+}
+
+.djo_review_head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 16px;
+}
+
+/* Where the review came from. Said plainly rather than with Google's own mark:
+   using the logo implies a verified integration, and these are transcribed by
+   hand. */
+.djo_review_source {
+	color: rgba(255, 255, 255, 0.45);
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
 .djo_reviews .djo_review blockquote.djo_review_text {
-	margin: 16px 0 0;
+	margin: 0;
 	padding: 0;
 	border: none;
 	background: none;
 	overflow: visible;
 	text-align: left;
-	color: var(--theme-color-text);
+	color: rgba(255, 255, 255, 0.82);
 	font-size: 15.5px;
 	line-height: 1.7;
 }
@@ -1775,48 +2026,118 @@ body.home .page_content_wrap {
 	margin: 0;
 }
 
-/* margin-top:auto sets the attribution on the card's bottom edge, so three
-   reviews of different lengths still sign off on one line. */
+/* margin-top:auto sets the attribution on the card's bottom edge. */
 .djo_review_by {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: auto 0 0;
+	padding-top: 22px;
+}
+
+.djo_review_avatar {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	background-color: rgba(255, 255, 255, 0.1);
+	color: #ffffff;
+	font-size: 16px;
+	font-weight: 700;
+	line-height: 1;
+	transition: background-color var(--djo-base) var(--djo-ease), transform var(--djo-base) var(--djo-spring);
+}
+
+.djo_review_by_text {
 	display: flex;
 	flex-direction: column;
 	gap: 2px;
-	margin: auto 0 0;
-	padding-top: 20px;
+	min-width: 0;
 }
 
 .djo_review_name {
-	color: var(--theme-color-title);
+	color: #ffffff;
 	font-weight: 600;
 }
 
 .djo_review_for {
-	color: var(--theme-color-meta);
+	color: rgba(255, 255, 255, 0.5);
 	font-size: 13px;
 }
 
-/* ---------- Call to action band ---------- */
+/* ---------- Hovering a review ----------
+   The card is inside a row that is already moving, and the marquee stops the
+   moment the pointer is over it - so the hover has to say "this one" clearly
+   enough to be read against that change. Four things move together: the card
+   lifts and brightens, the quotation mark swells, the initial fills, and the
+   stars warm up. */
+.djo_review:hover {
+	transform: translateY(-6px);
+	border-color: rgba(255, 255, 255, 0.28);
+	background-color: rgba(255, 255, 255, 0.08);
+}
+
+.djo_review:hover .djo_review_mark {
+	transform: scale(1.12) rotate(-6deg);
+	opacity: 0.14;
+}
+
+.djo_review:hover .djo_review_avatar {
+	transform: scale(1.08);
+	background-color: var(--djo-blue-pale);
+	color: var(--djo-ink);
+}
+
+.djo_review .djo_star {
+	transition: transform var(--djo-base) var(--djo-spring);
+}
+
+.djo_review:hover .djo_star {
+	transform: scale(1.12);
+}
+
+.djo_review .djo_star:nth-child(2) { transition-delay: 40ms; }
+.djo_review .djo_star:nth-child(3) { transition-delay: 80ms; }
+.djo_review .djo_star:nth-child(4) { transition-delay: 120ms; }
+.djo_review .djo_star:nth-child(5) { transition-delay: 160ms; }
+
+
+/* ---------- Call to action band ----------
+   White, not the near-black it used to be. It sits directly under the reviews,
+   which are dark, and the page's last word should be the brightest thing on it
+   rather than a second dark band the eye slides off.
+
+   It carries a little more furniture than the other light bands so it still
+   reads as an ending: a rule above the buttons, and the spine watermark drawn
+   in ink rather than white.
+------------------------------------------------------------ */
 
 .djo_cta {
 	overflow: hidden;
 }
 
 .djo_cta_inner {
-	max-width: 720px;
+	position: relative;
+	z-index: 1;
+	max-width: 760px;
 	margin: 0 auto;
 	text-align: center;
 }
 
 .djo_cta_title {
 	margin: 0 0 16px;
-	color: #ffffff;
-	font-size: clamp(26px, 3.2vw, 42px);
-	line-height: 1.15;
+	color: var(--theme-color-title);
+	font-size: clamp(28px, 3.6vw, 46px);
+	line-height: 1.12;
 }
 
 .djo_cta_text {
-	margin: 0 0 32px;
-	color: rgba(255, 255, 255, 0.82);
+	margin: 0 auto 34px;
+	max-width: 60ch;
+	color: var(--theme-color-text);
 	font-size: clamp(15px, 1.2vw, 18px);
 	line-height: 1.65;
 }
@@ -1824,11 +2145,23 @@ body.home .page_content_wrap {
 .djo_cta_actions {
 	display: flex;
 	flex-wrap: wrap;
+	align-items: center;
 	justify-content: center;
 	gap: 14px;
+	padding-top: 30px;
+	border-top: 1px solid var(--djo-rule);
 }
 
-
+/* The watermark again, this time drawn in ink so it can be seen on white. The
+   artwork is a white render, so it is inverted rather than being shipped a
+   second time in a second colour. */
+.djo_spine_cta {
+	left: 50%;
+	width: 30%;
+	transform: translateX(-50%);
+	filter: invert(1);
+	opacity: 0.05;
+}
 
 
 /* Speciality and Services pages
@@ -2541,6 +2874,665 @@ body.page-template-template-about .page_content_wrap {
 }
 
 
+/* Interactions
+   ------------------------------------------------------------
+   Every hoverable thing on the site, in one block, built from the four moves
+   defined at the top of this file. Gathered here rather than left beside each
+   component on purpose: the risk with a site that reacts to everything is that
+   each piece gets its own timing and direction and the whole starts to feel
+   twitchy. Side by side, they can be kept in one language.
+------------------------------------------------------------ */
+
+/* ---------- Header ---------- */
+
+/* The mark turns a few degrees, the way a badge does when you touch it. */
+.djo_logo_mark {
+	transition: transform var(--djo-base) var(--djo-spring), opacity var(--djo-base) var(--djo-ease);
+}
+
+.djo_logo:hover .djo_logo_mark {
+	transform: rotate(-8deg) scale(1.06);
+}
+
+/* An underline growing from the left under each menu item. transform-origin
+   flips on the way out, so it retracts back the way it came instead of
+   collapsing to its middle. */
+/* bottom:0, not 6px. At 6px the rule was drawn inside the text's own line box
+   and struck through the descenders - the y of Speciality and the tail of the s
+   in Services both came out looking crossed off. An underline has to clear the
+   deepest descender in the set or it is a strikethrough. */
+.djo_bar_menu .sc_layouts_menu_nav > li > a::before {
+	content: "";
+	position: absolute;
+	right: clamp(8px, 0.9vw, 16px);
+	bottom: 0;
+	left: clamp(8px, 0.9vw, 16px);
+	height: 2px;
+	border-radius: 2px;
+	background-color: var(--djo-blue);
+	transform: scaleX(0);
+	transform-origin: right center;
+	transition: transform var(--djo-base) var(--djo-ease);
+}
+
+/* The link needs room under the text for that rule to sit in. */
+.djo_bar_menu .sc_layouts_menu_nav > li > a {
+	padding-bottom: 6px;
+}
+
+.djo_bar_menu .sc_layouts_menu_nav > li > a {
+	position: relative;
+}
+
+.djo_bar_menu .sc_layouts_menu_nav > li:hover > a::before,
+.djo_bar_menu .sc_layouts_menu_nav > li.current-menu-item > a::before,
+.djo_bar_menu .djo_mega_item_open > a::before {
+	transform: scaleX(1);
+	transform-origin: left center;
+}
+
+/* The handset rocks, the way a ringing phone does. Two degrees each way is
+   enough to read at 20px; more looks like it is falling over. */
+@keyframes djo_ring {
+	0%, 100% { transform: rotate(0); }
+	20%      { transform: rotate(-13deg); }
+	40%      { transform: rotate(11deg); }
+	60%      { transform: rotate(-7deg); }
+	80%      { transform: rotate(4deg); }
+}
+
+.djo_bar_phone:hover .djo_bar_phone_icon svg,
+.djo_bar_phone:focus-visible .djo_bar_phone_icon svg {
+	animation: djo_ring .6s var(--djo-ease);
+}
+
+.djo_bar_phone_icon {
+	transition: background-color var(--djo-base) var(--djo-ease), color var(--djo-base) var(--djo-ease), transform var(--djo-base) var(--djo-spring);
+}
+
+.djo_bar_phone:hover .djo_bar_phone_icon {
+	transform: scale(1.08);
+}
+
+/* ---------- Mega menu ---------- */
+
+/* NUDGE right, TILT the icon, and a hairline growing down the left edge to
+   mark which door the pointer is on. */
+.djo_mega_item {
+	position: relative;
+	transition: background-color var(--djo-fast) var(--djo-ease),
+		border-color var(--djo-fast) var(--djo-ease),
+		color var(--djo-fast) var(--djo-ease),
+		transform var(--djo-fast) var(--djo-ease);
+}
+
+.djo_mega_item::before {
+	content: "";
+	position: absolute;
+	top: 12px;
+	bottom: 12px;
+	left: 0;
+	width: 2px;
+	border-radius: 2px;
+	background-color: var(--djo-blue);
+	transform: scaleY(0);
+	transform-origin: center bottom;
+	transition: transform var(--djo-fast) var(--djo-ease);
+}
+
+.djo_mega_item:hover,
+.djo_mega_item:focus-visible {
+	transform: translateX(4px);
+}
+
+.djo_mega_item:hover::before,
+.djo_mega_item:focus-visible::before {
+	transform: scaleY(1);
+	transform-origin: center top;
+}
+
+.djo_mega_item:hover .djo_mega_item_icon,
+.djo_mega_item:focus-visible .djo_mega_item_icon {
+	transform: rotate(-9deg) scale(1.1);
+}
+
+.djo_mega_foot_link:hover,
+.djo_mega_foot_link:focus-visible {
+	color: var(--djo-ink);
+}
+
+/* ---------- Hero ---------- */
+
+/* The stars land one after another rather than all at once, so the row reads
+   left to right the way it is meant to be counted. The delay is set per star
+   from its position in the row. */
+.djo_hero_rating .djo_star {
+	transition: transform var(--djo-base) var(--djo-spring), color var(--djo-base) var(--djo-ease);
+}
+
+.djo_hero_rating:hover .djo_star {
+	transform: scale(1.28) rotate(-10deg);
+}
+
+.djo_hero_rating .djo_star:nth-child(1) { transition-delay: 0ms; }
+.djo_hero_rating .djo_star:nth-child(2) { transition-delay: 45ms; }
+.djo_hero_rating .djo_star:nth-child(3) { transition-delay: 90ms; }
+.djo_hero_rating .djo_star:nth-child(4) { transition-delay: 135ms; }
+.djo_hero_rating .djo_star:nth-child(5) { transition-delay: 180ms; }
+
+/* The photograph drifts very slowly closer for as long as the pointer is over
+   the band. Slow and small on purpose - a hero that leaps at you is a hero
+   nobody trusts. */
+.djo_hero_media img {
+	transition: transform 1.6s var(--djo-ease);
+}
+
+.djo_hero:hover .djo_hero_media img {
+	transform: scale(1.04);
+}
+
+/* ---------- Trust strip ---------- */
+
+/* No lift here: these four sit inside one panel, and lifting one out of it
+   breaks the panel. The cell tints, the figure grows, and a bar wipes in along
+   the bottom edge instead. */
+.djo_trust_item {
+	position: relative;
+	transition: background-color var(--djo-base) var(--djo-ease);
+}
+
+.djo_trust_item::after {
+	content: "";
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	height: 3px;
+	background-color: var(--djo-blue);
+	transform: scaleX(0);
+	transition: transform var(--djo-base) var(--djo-ease);
+}
+
+.djo_trust_item:hover {
+	background-color: var(--djo-chip);
+}
+
+.djo_trust_item:hover::after {
+	transform: scaleX(1);
+}
+
+.djo_trust_value {
+	display: inline-block;
+	transition: transform var(--djo-base) var(--djo-spring);
+}
+
+.djo_trust_item:hover .djo_trust_value {
+	transform: scale(1.1);
+}
+
+/* ---------- Speciality cards ---------- */
+
+/* LIFT is already on the card. The chip fills, the icon tilts, and an arrow
+   grows out of the bottom edge to say the card is a link and not a label. */
+.djo_card_link:hover .djo_card_icon,
+.djo_card_link:focus-visible .djo_card_icon {
+	transform: rotate(-10deg) scale(1.12);
+	background-color: var(--djo-blue);
+}
+
+.djo_card_link:hover .djo_icon,
+.djo_card_link:focus-visible .djo_icon {
+	filter: brightness(0) invert(1);
+}
+
+.djo_card_title {
+	transition: color var(--djo-base) var(--djo-ease);
+}
+
+.djo_card_link:hover .djo_card_title {
+	color: var(--djo-blue);
+}
+
+.djo_band_dark .djo_card_link:hover .djo_card_title {
+	color: var(--djo-blue-pale);
+}
+
+/* ---------- Split: the surgeon band ---------- */
+
+.djo_split_media img {
+	transition: transform 1.2s var(--djo-ease);
+}
+
+.djo_split_media:hover img {
+	transform: scale(1.05);
+}
+
+.djo_split_facts li {
+	transition: transform var(--djo-fast) var(--djo-ease);
+}
+
+.djo_split_facts li svg {
+	transition: transform var(--djo-base) var(--djo-spring);
+}
+
+.djo_split_facts li:hover {
+	transform: translateX(5px);
+}
+
+.djo_split_facts li:hover svg {
+	transform: rotate(-12deg) scale(1.15);
+}
+
+/* ---------- Conditions rail ---------- */
+
+/* The icon rises off the rule and tilts; the dot swells into a ring; the label
+   goes from grey to ink. Three small things moving together, which reads as one
+   item lighting up rather than three separate effects. */
+.djo_rail_item:hover .djo_rail_icon {
+	transform: translateY(-5px) rotate(-8deg) scale(1.12);
+}
+
+.djo_rail_dot {
+	transition: transform var(--djo-base) var(--djo-spring), background-color var(--djo-base) var(--djo-ease);
+}
+
+.djo_rail_item:hover .djo_rail_dot {
+	transform: scale(1.55);
+	background-color: var(--djo-blue);
+}
+
+.djo_rail_label {
+	transition: color var(--djo-base) var(--djo-ease);
+}
+
+.djo_rail_item:hover .djo_rail_label {
+	color: var(--djo-blue);
+}
+
+.djo_conditions_media img {
+	transition: transform 1.2s var(--djo-ease);
+}
+
+.djo_conditions_media:hover img {
+	transform: scale(1.05);
+}
+
+/* ---------- Service cards ---------- */
+
+.djo_service:hover .djo_service_icon {
+	transform: rotate(-9deg) scale(1.1);
+}
+
+.djo_service_title a {
+	position: relative;
+	transition: color var(--djo-fast) var(--djo-ease);
+}
+
+/* The underline is on the title's own link so it tracks the text, not the card. */
+.djo_service_title a::after {
+	content: "";
+	position: absolute;
+	right: 0;
+	bottom: -3px;
+	left: 0;
+	height: 1.5px;
+	background-color: currentColor;
+	transform: scaleX(0);
+	transform-origin: right center;
+	transition: transform var(--djo-base) var(--djo-ease);
+}
+
+.djo_service:hover .djo_service_title a::after,
+.djo_service_title a:focus-visible::after {
+	transform: scaleX(1);
+	transform-origin: left center;
+}
+
+/* ---------- Symptoms ---------- */
+
+/* NUDGE is already on the row. The numeral grows, and a bar wipes down the left
+   edge - the same marker the mega menu uses, so the two read as the same idea. */
+.djo_symptoms_item {
+	position: relative;
+	overflow: hidden;
+}
+
+.djo_symptoms_item::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	width: 3px;
+	background-color: var(--djo-blue);
+	transform: scaleY(0);
+	transform-origin: center bottom;
+	transition: transform var(--djo-base) var(--djo-ease);
+}
+
+.djo_symptoms_item:hover::before {
+	transform: scaleY(1);
+	transform-origin: center top;
+}
+
+.djo_symptoms_num {
+	transition: transform var(--djo-base) var(--djo-spring), color var(--djo-base) var(--djo-ease);
+}
+
+.djo_symptoms_item:hover .djo_symptoms_num {
+	transform: scale(1.25);
+}
+
+.djo_symptoms_media img {
+	transition: transform 1.2s var(--djo-ease);
+}
+
+.djo_symptoms_media:hover img {
+	transform: scale(1.05);
+}
+
+/* The red-flag note is the one thing on the page that must not look playful.
+   It gets a colour shift and nothing else - no lift, no tilt. */
+.djo_symptoms_note {
+	transition: background-color var(--djo-base) var(--djo-ease);
+}
+
+.djo_symptoms_note:hover {
+	background-color: #F8E3E3;
+}
+
+.djo_symptoms_phone svg,
+.djo_entry_phone svg {
+	transition: transform var(--djo-base) var(--djo-spring);
+}
+
+.djo_symptoms_phone:hover svg,
+.djo_entry_phone:hover svg {
+	animation: djo_ring .6s var(--djo-ease);
+}
+
+/* ---------- Group pages: jump nav and entries ---------- */
+
+.djo_jump_link:hover .djo_jump_icon,
+.djo_jump_link:focus-visible .djo_jump_icon {
+	transform: rotate(-10deg) scale(1.12);
+}
+
+.djo_jump_link {
+	transition: border-color var(--djo-fast) var(--djo-ease),
+		background-color var(--djo-fast) var(--djo-ease),
+		color var(--djo-fast) var(--djo-ease),
+		transform var(--djo-fast) var(--djo-ease);
+}
+
+.djo_jump_link:hover,
+.djo_jump_link:focus-visible {
+	transform: translateY(-3px);
+}
+
+/* Hovering the whole entry turns its icon: one gesture for a band that is
+   otherwise a page of text. */
+.djo_entry:hover .djo_entry_icon {
+	transform: rotate(-8deg) scale(1.06);
+}
+
+.djo_entry_list li {
+	transition: transform var(--djo-fast) var(--djo-ease);
+}
+
+.djo_entry_tick svg {
+	transition: transform var(--djo-base) var(--djo-spring);
+}
+
+.djo_entry_list li:hover {
+	transform: translateX(5px);
+}
+
+.djo_entry_list li:hover .djo_entry_tick svg {
+	transform: scale(1.2) rotate(-12deg);
+}
+
+/* ---------- About page ---------- */
+
+.djo_timeline_item {
+	position: relative;
+	transition: transform var(--djo-fast) var(--djo-ease);
+}
+
+.djo_timeline_year {
+	display: inline-block;
+	transition: transform var(--djo-base) var(--djo-spring);
+}
+
+.djo_timeline_item:hover {
+	transform: translateX(6px);
+}
+
+.djo_timeline_item:hover .djo_timeline_year {
+	transform: scale(1.14);
+}
+
+.djo_value {
+	transition: transform var(--djo-base) var(--djo-ease), box-shadow var(--djo-base) var(--djo-ease), border-color var(--djo-base) var(--djo-ease);
+}
+
+.djo_value:hover {
+	transform: translateY(-6px);
+	box-shadow: var(--djo-shadow-lift);
+}
+
+.djo_value:hover .djo_value_icon {
+	transform: rotate(-10deg) scale(1.12);
+}
+
+/* The photograph pushes in while the caption stays put, which is what makes it
+   read as a window rather than a picture that grew. */
+.djo_facility {
+	transition: transform var(--djo-base) var(--djo-ease), box-shadow var(--djo-base) var(--djo-ease), border-color var(--djo-base) var(--djo-ease);
+}
+
+.djo_facility:hover {
+	transform: translateY(-6px);
+	box-shadow: var(--djo-shadow-lift);
+}
+
+.djo_facility_media img {
+	transition: transform 1.1s var(--djo-ease);
+}
+
+.djo_facility:hover .djo_facility_media img {
+	transform: scale(1.07);
+}
+
+.djo_facility_title {
+	transition: color var(--djo-base) var(--djo-ease);
+}
+
+.djo_facility:hover .djo_facility_title {
+	color: var(--djo-blue);
+}
+
+.djo_band_dark .djo_facility:hover .djo_facility_title {
+	color: var(--djo-blue-pale);
+}
+
+/* ---------- Contact page ---------- */
+
+.contact_page .contact_details_item {
+	transition: transform var(--djo-fast) var(--djo-ease);
+}
+
+.contact_page .contact_details_icon {
+	transition: transform var(--djo-base) var(--djo-spring),
+		background-color var(--djo-base) var(--djo-ease),
+		color var(--djo-base) var(--djo-ease);
+}
+
+.contact_page .contact_details_item:hover {
+	transform: translateX(5px);
+}
+
+.contact_page .contact_details_item:hover .contact_details_icon {
+	transform: rotate(-10deg) scale(1.1);
+	background-color: var(--djo-blue);
+	color: #ffffff;
+}
+
+.contact_page .contact_hours_item {
+	transition: color var(--djo-fast) var(--djo-ease), transform var(--djo-fast) var(--djo-ease);
+}
+
+.contact_page .contact_hours_item:hover {
+	transform: translateX(4px);
+}
+
+.contact_page .contact_hours_item:hover .contact_hours_label {
+	color: var(--djo-blue);
+}
+
+.contact_page .contact_social_link {
+	transition: border-color var(--djo-fast) var(--djo-ease),
+		background-color var(--djo-fast) var(--djo-ease),
+		color var(--djo-fast) var(--djo-ease),
+		transform var(--djo-fast) var(--djo-ease);
+}
+
+.contact_page .contact_social_link:hover {
+	transform: translateY(-3px);
+}
+
+.contact_page .contact_social_icon {
+	transition: transform var(--djo-base) var(--djo-spring);
+}
+
+.contact_page .contact_social_link:hover .contact_social_icon {
+	transform: rotate(-12deg) scale(1.15);
+}
+
+/* Form fields. The only interaction on the site that has to work on focus more
+   than on hover - most of the people filling this in are using a keyboard. */
+.contact_form_wrap .contact_form_row input,
+.contact_form_wrap .contact_form_row textarea {
+	transition: border-color var(--djo-fast) var(--djo-ease), box-shadow var(--djo-fast) var(--djo-ease);
+}
+
+.contact_form_wrap .contact_form_row input:hover,
+.contact_form_wrap .contact_form_row textarea:hover {
+	border-color: var(--djo-blue-bright);
+}
+
+.contact_form_wrap .contact_form_row input:focus,
+.contact_form_wrap .contact_form_row textarea:focus {
+	border-color: var(--djo-blue);
+	box-shadow: 0 0 0 3px rgba(36, 64, 125, 0.14);
+}
+
+/* The label rises with its field, so the pair reads as one control. */
+.contact_form_wrap .contact_form_row label {
+	transition: color var(--djo-fast) var(--djo-ease);
+}
+
+.contact_form_wrap .contact_form_row:focus-within label {
+	color: var(--djo-blue);
+}
+
+.contact_page .contact_map_frame {
+	overflow: hidden;
+}
+
+.contact_page .contact_map_frame iframe {
+	transition: filter var(--djo-slow) var(--djo-ease);
+	filter: grayscale(0.35);
+}
+
+.contact_page .contact_map:hover .contact_map_frame iframe {
+	filter: grayscale(0);
+}
+
+/* ---------- Footer ---------- */
+
+/* A dash grows in front of the link and pushes the label along with it. */
+.footer_jagadale .djo_footer_menu_item a {
+	position: relative;
+	display: inline-block;
+	transition: transform var(--djo-fast) var(--djo-ease), color var(--djo-fast) var(--djo-ease);
+}
+
+.footer_jagadale .djo_footer_menu_item a::before {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: -14px;
+	width: 8px;
+	height: 1.5px;
+	background-color: currentColor;
+	transform: scaleX(0);
+	transform-origin: right center;
+	transition: transform var(--djo-fast) var(--djo-ease);
+}
+
+.footer_jagadale .djo_footer_menu_item a:hover,
+.footer_jagadale .djo_footer_menu_item a:focus-visible {
+	transform: translateX(14px);
+}
+
+.footer_jagadale .djo_footer_menu_item a:hover::before,
+.footer_jagadale .djo_footer_menu_item a:focus-visible::before {
+	transform: scaleX(1);
+	transform-origin: left center;
+}
+
+.footer_jagadale .djo_footer_social {
+	transition: border-color var(--djo-fast) var(--djo-ease),
+		background-color var(--djo-fast) var(--djo-ease),
+		color var(--djo-fast) var(--djo-ease),
+		transform var(--djo-base) var(--djo-spring);
+}
+
+.footer_jagadale .djo_footer_social:hover,
+.footer_jagadale .djo_footer_social:focus-visible {
+	transform: translateY(-4px) rotate(-10deg);
+	border-color: transparent;
+	background-color: var(--djo-blue);
+	color: #ffffff;
+}
+
+.footer_jagadale .djo_footer_logo {
+	transition: transform var(--djo-base) var(--djo-ease);
+}
+
+.footer_jagadale .djo_footer_logo img {
+	transition: transform var(--djo-base) var(--djo-spring);
+}
+
+.footer_jagadale .djo_footer_logo:hover img {
+	transform: rotate(-8deg) scale(1.06);
+}
+
+.footer_jagadale .djo_footer_bottom_links a {
+	position: relative;
+}
+
+.footer_jagadale .djo_footer_bottom_links a::after {
+	content: "";
+	position: absolute;
+	right: 0;
+	bottom: -3px;
+	left: 0;
+	height: 1px;
+	background-color: currentColor;
+	transform: scaleX(0);
+	transform-origin: right center;
+	transition: transform var(--djo-fast) var(--djo-ease);
+}
+
+.footer_jagadale .djo_footer_bottom_links a:hover::after,
+.footer_jagadale .djo_footer_bottom_links a:focus-visible::after {
+	transform: scaleX(1);
+	transform-origin: left center;
+}
+
+
 /* Site footer (templates/footer-jagadale.php)
    ------------------------------------------------------------
    Replaces the parent theme's widget-driven footer. Dark band, logo on its own
@@ -2785,6 +3777,49 @@ body.page-template-template-about .page_content_wrap {
 	overflow-wrap: anywhere;
 }
 
+/* ---------- The build credit ----------
+   Mark plus wordmark, matching the pattern the agency uses on its other builds:
+   an <img> when images/blocsys.* is bundled, and a text wordmark when it is
+   not - so the credit is never missing and the mark is never hotlinked. */
+
+.footer_jagadale .djo_footer_credit {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	margin: 14px 0 0;
+}
+
+.footer_jagadale .djo_footer_credit_label {
+	font-size: 13px;
+	opacity: 0.7;
+}
+
+.footer_jagadale .djo_footer_credit_link {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	transition: opacity var(--djo-fast) var(--djo-ease);
+}
+
+.footer_jagadale .djo_footer_credit_link img {
+	display: block;
+	width: auto;
+	height: 20px;
+	transition: transform var(--djo-base) var(--djo-spring);
+}
+
+.footer_jagadale .djo_footer_credit_name {
+	color: var(--djo-footer-heading);
+	font-size: 14px;
+	font-weight: 600;
+	letter-spacing: 0.01em;
+}
+
+.footer_jagadale .djo_footer_credit_link:hover img,
+.footer_jagadale .djo_footer_credit_link:focus-visible img {
+	transform: rotate(-10deg) scale(1.1);
+}
+
 /* ---------- Bottom bar ---------- */
 
 .footer_jagadale .djo_footer_bottom {
@@ -2800,17 +3835,6 @@ body.page-template-template-about .page_content_wrap {
 
 .footer_jagadale .djo_footer_copyright {
 	margin: 0;
-}
-
-/* The medical disclaimer. Quieter than the copyright above it - it is a legal
-   necessity rather than something anyone is meant to read twice - but not so
-   quiet that it stops being legible. */
-.footer_jagadale .djo_footer_disclaimer {
-	margin: 8px 0 0;
-	max-width: 62ch;
-	font-size: 13px;
-	line-height: 1.55;
-	opacity: 0.75;
 }
 
 .footer_jagadale .djo_footer_bottom_links {
@@ -2868,14 +3892,19 @@ body.page-template-template-about .page_content_wrap {
 	.djo_split {
 		grid-template-columns: minmax(0, 1fr);
 	}
-	/* The photograph reads as an illustration of the text, so it follows it
-	   rather than opening the section on a page where the text is the point. */
+	/* Stacked, the portrait opens the section rather than following it: it is a
+	   photograph of the person the next four paragraphs are about, and meeting
+	   them first is the right order to read it in. Held to a measure and centred,
+	   because a 4:5 portrait at the full width of a phone is a full screen of
+	   face before a word of copy. */
 	.djo_split_media {
-		order: 2;
+		order: -1;
+		max-width: 360px;
+		margin-right: auto;
+		margin-left: auto;
 	}
 	.djo_values_grid,
-	.djo_facilities_grid,
-	.djo_reviews_grid {
+	.djo_facilities_grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 	.contact_page .contact_layout {
@@ -2912,8 +3941,7 @@ body.page-template-template-about .page_content_wrap {
 	.djo_cards,
 	.djo_services_grid,
 	.djo_values_grid,
-	.djo_facilities_grid,
-	.djo_reviews_grid {
+	.djo_facilities_grid {
 		grid-template-columns: minmax(0, 1fr);
 	}
 	/* Equal rows are what keeps a grid of cards from stepping. In one column
@@ -2979,5 +4007,323 @@ body.page-template-template-about .page_content_wrap {
 	.footer_jagadale .djo_footer_bottom {
 		flex-direction: column;
 		margin-top: 45px;
+	}
+}
+
+
+/* Reduced motion
+   ------------------------------------------------------------
+   Not softened - off. Someone who has asked their operating system to stop
+   moving things has asked once, for everything, and a site that answers with
+   "smaller animations" has not listened.
+
+   The reviews are the case that needs care: turning the animation off would
+   leave a track twice the width of the window with half of it unreachable. So
+   it becomes what it should have been all along for that reader - a plain row
+   that scrolls, with the duplicate set hidden so nothing is read out twice.
+
+   Colour transitions are left alone throughout. A link changing colour on
+   hover is feedback, not motion, and removing it takes away the only signal
+   that something is interactive.
+------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+	.djo_marquee_track {
+		animation: none;
+		width: auto;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+	}
+
+	.djo_marquee {
+		-webkit-mask-image: none;
+		mask-image: none;
+	}
+
+	.djo_marquee .djo_review {
+		scroll-snap-align: start;
+	}
+
+	/* The second copy is decorative padding for the loop. With no loop, it is
+	   just the same three reviews printed twice. */
+	.djo_marquee .djo_review[aria-hidden="true"] {
+		display: none;
+	}
+
+	/* Every transform-driven effect on the site, in one sweep. Written as a
+	   universal selector because the alternative is remembering to add each new
+	   hover to a list, and that list is the thing that always goes stale. */
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+
+	/* Anything whose resting state is a scaled-down bar or rule has to be shown
+	   outright rather than transitioned in, or it never appears at all. */
+	.djo_symptoms_item:hover::before,
+	.djo_mega_item:hover::before,
+	.djo_trust_item:hover::after,
+	.djo_service:hover .djo_service_title a::after,
+	.djo_bar_menu .sc_layouts_menu_nav > li:hover > a::before {
+		transform: none;
+	}
+}
+
+
+/* Legal pages (template-privacy.php, template-cookies.php)
+   ------------------------------------------------------------
+   A sticky contents nav beside a long document. Both policies use it; the
+   layout lives in inc/legal.php.
+------------------------------------------------------------ */
+
+.djo_legal_layout {
+	display: grid;
+	grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+	gap: clamp(32px, 5vw, 80px);
+	align-items: start;
+}
+
+/* Sticky, because these pages run to a dozen sections and a reader who wants
+   section 9 should not have to scroll back to the top to find it again. The
+   offset clears the pinned header, same measurement anchored headings use. */
+.djo_legal_toc {
+	position: sticky;
+	top: calc(var(--djo-header-h, 96px) + 24px);
+	padding: 22px 24px;
+	border: 1px solid var(--djo-rule);
+	border-radius: var(--djo-radius);
+	background-color: var(--djo-chip);
+}
+
+.djo_legal_toc_title {
+	margin: 0 0 14px;
+	color: var(--theme-color-meta);
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+.djo_legal_toc_list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	counter-reset: djo-toc;
+}
+
+.djo_legal_toc_list li {
+	counter-increment: djo-toc;
+	margin-bottom: 9px;
+}
+
+.djo_legal_toc_list a {
+	display: flex;
+	gap: 9px;
+	color: var(--theme-color-text);
+	font-size: 14px;
+	line-height: 1.45;
+	text-decoration: none;
+	transition: color var(--djo-fast) var(--djo-ease), transform var(--djo-fast) var(--djo-ease);
+}
+
+/* The number is generated rather than written into the markup, so it can never
+   disagree with the number on the section it points at - both count the same
+   list from the same source. */
+.djo_legal_toc_list a::before {
+	content: counter(djo-toc, decimal-leading-zero);
+	flex: 0 0 auto;
+	color: var(--djo-blue-bright);
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.djo_legal_toc_list a:hover,
+.djo_legal_toc_list a:focus-visible {
+	transform: translateX(3px);
+	color: var(--djo-blue);
+}
+
+.djo_legal_body {
+	max-width: 72ch;
+}
+
+.djo_legal_head {
+	margin-bottom: clamp(30px, 3.4vw, 48px);
+	padding-bottom: clamp(24px, 2.6vw, 36px);
+	border-bottom: 1px solid var(--djo-rule);
+}
+
+.djo_legal_title {
+	margin: 0 0 18px;
+	font-size: clamp(30px, 4vw, 48px);
+	line-height: 1.12;
+}
+
+.djo_legal_intro {
+	margin: 0 0 14px;
+	color: var(--theme-color-text);
+	font-size: clamp(16px, 1.25vw, 18px);
+	line-height: 1.7;
+}
+
+.djo_legal_section {
+	margin-bottom: clamp(30px, 3.2vw, 46px);
+}
+
+.djo_legal_section_title {
+	display: flex;
+	align-items: baseline;
+	gap: 14px;
+	margin: 0 0 16px;
+	font-size: clamp(20px, 2vw, 26px);
+	line-height: 1.25;
+}
+
+.djo_legal_number {
+	flex: 0 0 auto;
+	color: var(--djo-blue-bright);
+	font-size: 15px;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.djo_legal_lead {
+	color: var(--theme-color-title);
+	font-size: 16.5px;
+	font-weight: 500;
+	line-height: 1.65;
+}
+
+.djo_legal_section p {
+	margin: 0 0 14px;
+	color: var(--theme-color-text);
+	line-height: 1.75;
+}
+
+.djo_legal_section a {
+	color: var(--djo-blue);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.djo_legal_list {
+	list-style: none;
+	margin: 0 0 16px;
+	padding: 0;
+}
+
+.djo_legal_list li {
+	position: relative;
+	margin-bottom: 11px;
+	padding-left: 22px;
+	color: var(--theme-color-text);
+	line-height: 1.7;
+}
+
+.djo_legal_list li::before {
+	content: "";
+	position: absolute;
+	top: 0.62em;
+	left: 2px;
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background-color: var(--djo-blue-bright);
+}
+
+.djo_legal_list strong {
+	color: var(--theme-color-title);
+}
+
+/* ---------- The cookie table ---------- */
+
+/* Scrolls inside its own box rather than pushing the page sideways: four
+   columns of prose will not fit a phone at any font size worth reading. */
+.djo_legal_table_wrap {
+	overflow-x: auto;
+	margin: 0 0 18px;
+	border: 1px solid var(--djo-rule);
+	border-radius: var(--djo-radius-sm);
+}
+
+.djo_legal_table {
+	width: 100%;
+	min-width: 560px;
+	border-collapse: collapse;
+	font-size: 14.5px;
+}
+
+.djo_legal_table th,
+.djo_legal_table td {
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--djo-rule);
+	text-align: left;
+	vertical-align: top;
+	line-height: 1.6;
+}
+
+.djo_legal_table thead th {
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+/* background-color is restated because the parent theme paints every <th> in
+   the title colour with white text - right for a data table's header row, and
+   very wrong for a row header, which came out as a black box with the cookie
+   name invisible inside it. */
+.djo_legal_table tbody th {
+	background-color: transparent;
+	color: var(--theme-color-title);
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 12.5px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+/* The header row keeps a tint, but the theme's near-black is heavier than this
+   table needs - it is four columns of prose, not a spreadsheet. */
+.djo_legal_table thead th {
+	background-color: var(--djo-chip) !important;
+	color: var(--theme-color-title) !important;
+}
+
+.djo_legal_table td {
+	color: var(--theme-color-text);
+}
+
+.djo_legal_table tbody tr:last-child th,
+.djo_legal_table tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.djo_legal_table tbody tr {
+	transition: background-color var(--djo-fast) var(--djo-ease);
+}
+
+.djo_legal_table tbody tr:hover {
+	background-color: var(--djo-chip);
+}
+
+.djo_legal_updated {
+	margin: clamp(30px, 3vw, 44px) 0 0;
+	padding-top: 22px;
+	border-top: 1px solid var(--djo-rule);
+	color: var(--theme-color-meta);
+	font-size: 14px;
+}
+
+@media (max-width: 1023px) {
+	.djo_legal_layout {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	/* Nothing to stick to once it is above the document rather than beside it. */
+	.djo_legal_toc {
+		position: static;
 	}
 }

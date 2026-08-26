@@ -39,6 +39,12 @@ require_once get_stylesheet_directory() . '/inc/enquiry-form.php';
  */
 require_once get_stylesheet_directory() . '/inc/nav.php';
 
+/**
+ * The privacy and cookie policies: their shared layout, and the note on which
+ * Indian instruments they are written against.
+ */
+require_once get_stylesheet_directory() . '/inc/legal.php';
+
 
 /* ---------------------------------------------------------------------------
  * Business details
@@ -323,6 +329,8 @@ if ( ! function_exists( 'orto_child_hide_page_title' ) ) {
 			'template-about.php',
 			'template-speciality.php',
 			'template-services.php',
+			'template-privacy.php',
+			'template-cookies.php',
 		);
 
 		foreach ( $templates as $template ) {
@@ -496,7 +504,7 @@ if ( ! function_exists( 'orto_child_get_footer_legal_pages' ) ) {
 			'orto_child_footer_legal_pages',
 			array(
 				array( 'slug' => 'privacy-policy', 'title' => __( 'Privacy Policy', 'orto' ) ),
-				array( 'slug' => 'terms-of-use', 'title' => __( 'Terms of Use', 'orto' ) ),
+				array( 'slug' => 'cookie-policy', 'title' => __( 'Cookie Policy', 'orto' ) ),
 			)
 		);
 	}
@@ -568,10 +576,12 @@ if ( ! function_exists( 'orto_child_cta_band' ) ) {
 			)
 		);
 		?>
-		<section class="djo_cta djo_band djo_band_deep">
+		<section class="djo_cta djo_band djo_band_light">
+			<span class="djo_spine djo_spine_cta" aria-hidden="true"></span>
+
 			<div class="content_wrap">
 				<div class="djo_cta_inner">
-					<span class="djo_eyebrow djo_eyebrow_light"><?php echo esc_html( $args['eyebrow'] ); ?></span>
+					<span class="djo_eyebrow"><?php echo esc_html( $args['eyebrow'] ); ?></span>
 					<h2 class="djo_cta_title"><?php echo esc_html( $args['title'] ); ?></h2>
 					<?php if ( '' !== $args['text'] ) { ?>
 						<p class="djo_cta_text"><?php echo esc_html( $args['text'] ); ?></p>
@@ -582,7 +592,7 @@ if ( ! function_exists( 'orto_child_cta_band' ) ) {
 							<?php esc_html_e( 'Book an Appointment', 'orto' ); ?>
 						</a>
 						<?php if ( ! empty( $business['phone'] ) ) { ?>
-							<a class="djo_button djo_button_ghost" href="tel:<?php echo esc_attr( $business['phone_link'] ); ?>">
+							<a class="djo_button djo_button_outline" href="tel:<?php echo esc_attr( $business['phone_link'] ); ?>">
 								<?php echo orto_child_icon( 'phone' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								<?php echo esc_html( $business['phone'] ); ?>
 							</a>
@@ -770,7 +780,7 @@ if ( ! function_exists( 'orto_child_stars' ) ) {
  * to be deactivated and reactivated.
  */
 if ( ! defined( 'ORTO_CHILD_PAGES_VERSION' ) ) {
-	define( 'ORTO_CHILD_PAGES_VERSION', '1' );
+	define( 'ORTO_CHILD_PAGES_VERSION', '3' );
 }
 
 if ( ! function_exists( 'orto_child_get_managed_pages' ) ) {
@@ -791,6 +801,14 @@ if ( ! function_exists( 'orto_child_get_managed_pages' ) ) {
 			'contact-us' => array(
 				'title'    => 'Contact Us',
 				'template' => 'template-contact.php',
+			),
+			'privacy-policy' => array(
+				'title'    => 'Privacy Policy',
+				'template' => 'template-privacy.php',
+			),
+			'cookie-policy'  => array(
+				'title'    => 'Cookie Policy',
+				'template' => 'template-cookies.php',
 			),
 		);
 	}
@@ -832,8 +850,6 @@ if ( ! function_exists( 'orto_child_ensure_pages' ) ) {
 
 		// The home page is the theme's front-page.php, not a blog listing.
 		update_option( 'show_on_front', 'posts' );
-
-		update_option( 'orto_child_pages_provisioned_version', ORTO_CHILD_PAGES_VERSION );
 	}
 }
 
@@ -867,11 +883,20 @@ if ( ! function_exists( 'orto_child_ensure_menus' ) ) {
 		} else {
 			$menu_id = $menu->term_id;
 
-			// Start clean so the menu can never drift from the page list.
-			$existing = wp_get_nav_menu_items( $menu_id );
-			if ( $existing ) {
-				foreach ( $existing as $item ) {
-					wp_delete_post( $item->ID, true );
+			/*
+			 * Start clean so the menu can never drift from the page list.
+			 *
+			 * get_objects_in_term() rather than wp_get_nav_menu_items(): the
+			 * latter is filtered, cached, and returns false outside a fully
+			 * booted menu context - and a false there means "delete nothing",
+			 * which is how a rebuild ends up appending a second copy of every
+			 * item instead of replacing the first.
+			 */
+			$existing = get_objects_in_term( $menu_id, 'nav_menu' );
+
+			if ( ! is_wp_error( $existing ) ) {
+				foreach ( $existing as $item_id ) {
+					wp_delete_post( (int) $item_id, true );
 				}
 			}
 		}
@@ -948,11 +973,33 @@ if ( ! function_exists( 'orto_child_ensure_menus' ) ) {
 }
 
 if ( ! function_exists( 'orto_child_maybe_ensure_pages' ) ) {
-	add_action( 'after_switch_theme', 'orto_child_ensure_pages' );
+	add_action( 'after_switch_theme', 'orto_child_maybe_ensure_pages' );
 	add_action( 'init', 'orto_child_maybe_ensure_pages' );
 	function orto_child_maybe_ensure_pages() {
-		if ( get_option( 'orto_child_pages_provisioned_version' ) !== ORTO_CHILD_PAGES_VERSION ) {
-			orto_child_ensure_pages();
+		if ( get_option( 'orto_child_pages_provisioned_version' ) === ORTO_CHILD_PAGES_VERSION ) {
+			return;
 		}
+
+		/*
+		 * Claim the version BEFORE doing the work, not after.
+		 *
+		 * This ran the other way round and produced a real bug: two requests
+		 * arriving at the same moment - a page load and the browser's favicon
+		 * or heartbeat request, say - both read the old version, both decided
+		 * to rebuild, and both appended a fresh set of items to the menu. The
+		 * site came back with Services and Contact Us in the navigation twice,
+		 * which then overflowed the bar and pushed the parent theme's "more"
+		 * chevron into the header.
+		 *
+		 * update_option() is a single write, so whichever request gets there
+		 * first claims the rebuild and the other returns above. Doing the work
+		 * afterwards means a fatal mid-rebuild would leave the version claimed
+		 * and the job half done - which is why the version is a constant a
+		 * developer can bump to force it again, rather than something the site
+		 * is trusted to retry on its own.
+		 */
+		update_option( 'orto_child_pages_provisioned_version', ORTO_CHILD_PAGES_VERSION );
+
+		orto_child_ensure_pages();
 	}
 }

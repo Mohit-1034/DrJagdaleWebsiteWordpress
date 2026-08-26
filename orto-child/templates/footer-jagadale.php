@@ -180,8 +180,31 @@ if ( '' === $orto_child_footer_logo_url ) {
 					);
 					?>
 				</p>
-				<p class="djo_footer_disclaimer">
-					<?php esc_html_e( 'The information on this website is for general guidance and is not a substitute for a consultation. In an emergency, go to your nearest hospital.', 'orto' ); ?>
+
+				<?php
+				/*
+				 * Agency credit. Uses orto-child/images/blocsys.svg or .png when
+				 * that file is bundled, and falls back to a text wordmark when it
+				 * is not - so the credit is never missing and the mark is never
+				 * hotlinked from blocsys.com.
+				 */
+				$orto_child_footer_credit_url = '';
+
+				foreach ( array( 'blocsys.svg', 'blocsys.png', 'blocsys.webp' ) as $orto_child_footer_credit_file ) {
+					if ( file_exists( get_stylesheet_directory() . '/images/' . $orto_child_footer_credit_file ) ) {
+						$orto_child_footer_credit_url = get_stylesheet_directory_uri() . '/images/' . $orto_child_footer_credit_file;
+						break;
+					}
+				}
+				?>
+				<p class="djo_footer_credit">
+					<span class="djo_footer_credit_label"><?php esc_html_e( 'Built by', 'orto' ); ?></span>
+					<a class="djo_footer_credit_link" href="https://blocsys.com/" target="_blank" rel="noopener">
+						<?php if ( $orto_child_footer_credit_url ) { ?>
+							<img src="<?php echo esc_url( $orto_child_footer_credit_url ); ?>" alt="Blocsys" width="64" height="64" loading="lazy" decoding="async">
+						<?php } ?>
+						<span class="djo_footer_credit_name">Blocsys</span>
+					</a>
 				</p>
 			</div>
 
