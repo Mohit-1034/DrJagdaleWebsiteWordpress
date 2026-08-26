@@ -558,6 +558,47 @@ if ( ! function_exists( 'orto_child_resolve_footer_links' ) ) {
  * ------------------------------------------------------------------------- */
 
 /**
+ * The class for the next full-width band on this page.
+ *
+ * The page alternates light and dark the whole way down. That used to be
+ * written out by hand on each section, and by $index % 2 for the run of
+ * entries on the Speciality and Services pages - which is fragile in a way
+ * that had already broken: taking one entry out of the list flipped the
+ * parity of everything after it, so the last entry and the call to action
+ * ended up both light and the seam between them vanished.
+ *
+ * A counter cannot get that wrong. Each call returns the opposite of the last,
+ * so no page can hold two adjacent bands of the same value however many
+ * sections it happens to have.
+ *
+ * Pass 'light' or 'dark' to force one - the hero has to be dark and a page
+ * hero has to be light, and those are design decisions rather than positions
+ * in a sequence. Forcing also re-seeds the counter, so everything after it
+ * carries on alternating correctly from there.
+ *
+ * The call-to-action band is deliberately NOT part of this. It is the page's
+ * closing action rather than another content section, it has its own ground,
+ * and keeping it out of the sequence is what stops it being able to break the
+ * sequence - see orto_child_cta_band().
+ *
+ * @param string $force 'light', 'dark', or '' to alternate.
+ * @return string
+ */
+if ( ! function_exists( 'orto_child_band_class' ) ) {
+	function orto_child_band_class( $force = '' ) {
+		static $dark = false;
+
+		if ( 'dark' === $force || 'light' === $force ) {
+			$dark = ( 'dark' === $force );
+		} else {
+			$dark = ! $dark;
+		}
+
+		return $dark ? 'djo_band_dark' : 'djo_band_light';
+	}
+}
+
+/**
  * The call-to-action band that closes most pages.
  *
  * One function rather than a copy in each template, so the wording and the
