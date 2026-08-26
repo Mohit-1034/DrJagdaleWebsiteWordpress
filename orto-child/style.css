@@ -18,3 +18,2384 @@ Template: orto
 
 /* =Child-Theme customization starts here
 ------------------------------------------------------------ */
+
+
+/* Brand palette
+   ------------------------------------------------------------
+   The parent skin ships a warm sage-green scheme. The clinic's own identity is
+   cool: a navy wordmark, a red rule and the olive tree in the mark, and the
+   whole supplied icon set is drawn in #4B5FA5. Rather than fight that with a
+   second set of colours layered on top, the theme's own tokens are redefined
+   here - so every component the parent renders (buttons, links, inputs,
+   pagination, the blog) follows the clinic's palette without any of them being
+   restyled one at a time.
+
+   Only the --theme-color-* names the theme actually emits are used. Names like
+   "alter_bg_color" and "text_link" exist as PHP-side aliases only and resolve
+   to nothing in CSS.
+
+   Contrast, checked against --djo-surface (#ffffff):
+     --theme-color-title  #1B2A4A   13.1:1
+     --theme-color-text   #4A5568    7.6:1
+     --theme-color-link   #2C4585   9.6:1
+     --theme-color-meta   #6B7688    4.8:1
+   The red is an accent only - it is never asked to carry body copy.
+------------------------------------------------------------ */
+
+/* The selector list is not decoration. The parent skin sets its tokens on
+   `.scheme_default, body.scheme_default, ...` in skins/default/css/__custom.css,
+   and `body.scheme_default` (0,1,1) outranks a bare `:root` (0,1,0) - so an
+   override written only on :root loses, and the theme's own sage green comes
+   back everywhere a --theme-color-* is read (the current menu item, the contact
+   page's icons, every link the parent styles). Matching the parent's own
+   selector makes the two equal, and this stylesheet is enqueued after theirs,
+   so the later rule wins. :root is kept alongside it for anything rendered
+   outside a scheme wrapper. */
+:root,
+.scheme_default,
+body.scheme_default {
+	/* The clinic's own colours, named for what they are. */
+	--djo-navy: #1B2A4A;
+	--djo-blue: #2C4585;
+	--djo-blue-bright: #4B5FA5; /* the supplied icon set's own line colour */
+	--djo-red: #C8202B;         /* the signage rule; an accent, never body copy */
+	--djo-olive: #7E8F3F;       /* the tree in the mark */
+
+	--djo-surface: #ffffff;
+	--djo-tint: #F1F4FA;
+	--djo-rule: #DFE5F0;
+
+	/* Redefinitions of the parent skin's own tokens. */
+	--theme-color-bg_color: #ffffff;
+	--theme-color-bg_color_2: #F1F4FA;
+	--theme-color-bd_color: #DFE5F0;
+	--theme-color-title: #1B2A4A;
+	--theme-color-text: #4A5568;
+	--theme-color-meta: #6B7688;
+	--theme-color-link: #2C4585;
+	--theme-color-hover: #1B2A4A;
+
+	--djo-radius: 14px;
+	--djo-radius-sm: 10px;
+	--djo-shadow: 0 4px 20px rgba(27, 42, 74, 0.07);
+	--djo-shadow-lift: 0 14px 34px rgba(27, 42, 74, 0.13);
+}
+
+
+/* Shared furniture
+   ------------------------------------------------------------
+   The eyebrow, the section heading, the buttons and the star row are used by
+   every template, so they are defined once here rather than per page.
+------------------------------------------------------------ */
+
+.djo_eyebrow {
+	display: block;
+	margin-bottom: 14px;
+	color: var(--djo-blue);
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+
+/* On the dark bands - the hero and the call to action - the blue eyebrow
+   disappears into the navy behind it. */
+.djo_eyebrow_light {
+	color: rgba(255, 255, 255, 0.72);
+}
+
+.djo_head {
+	margin-bottom: clamp(32px, 3.5vw, 52px);
+}
+
+.djo_head_center {
+	max-width: 720px;
+	margin-right: auto;
+	margin-left: auto;
+	text-align: center;
+}
+
+.djo_head_title {
+	margin: 0;
+	color: var(--theme-color-title);
+	font-size: clamp(28px, 3.4vw, 44px);
+	line-height: 1.18;
+}
+
+.djo_head_text {
+	margin: 16px 0 0;
+	color: var(--theme-color-text);
+	font-size: clamp(16px, 1.2vw, 18px);
+	line-height: 1.65;
+}
+
+/* ---------- Buttons ----------
+   Named rather than borrowed from the parent's .sc_button, because the parent's
+   button styling is driven by the skin and changes shape with it. These three
+   are the site's own and stay put. */
+
+.djo_button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 9px;
+	padding: 13px 26px;
+	border: 1px solid transparent;
+	border-radius: 100px;
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.3;
+	text-align: center;
+	text-decoration: none;
+	white-space: nowrap;
+	cursor: pointer;
+	transition: background-color .3s ease, border-color .3s ease, color .3s ease, transform .3s ease, box-shadow .3s ease;
+}
+
+.djo_button svg {
+	width: 18px;
+	height: 18px;
+	flex: 0 0 auto;
+}
+
+.djo_button_solid {
+	background-color: var(--djo-blue);
+	color: #ffffff;
+}
+
+.djo_button_solid:hover,
+.djo_button_solid:focus-visible {
+	transform: translateY(-3px);
+	background-color: var(--djo-navy);
+	color: #ffffff !important;
+	box-shadow: 0 8px 20px rgba(27, 42, 74, 0.32);
+}
+
+.djo_button_outline {
+	border-color: var(--theme-color-bd_color);
+	background-color: transparent;
+	color: var(--theme-color-title);
+}
+
+.djo_button_outline:hover,
+.djo_button_outline:focus-visible {
+	border-color: var(--djo-blue);
+	background-color: var(--djo-tint);
+	color: var(--djo-blue) !important;
+}
+
+/* For use on the dark bands only - a transparent button with a white edge. */
+.djo_button_ghost {
+	border-color: rgba(255, 255, 255, 0.45);
+	background-color: transparent;
+	color: #ffffff;
+}
+
+.djo_button_ghost:hover,
+.djo_button_ghost:focus-visible {
+	transform: translateY(-3px);
+	border-color: #ffffff;
+	background-color: rgba(255, 255, 255, 0.12);
+	color: #ffffff !important;
+}
+
+/* ---------- Stars ---------- */
+
+.djo_stars {
+	display: inline-flex;
+	gap: 2px;
+	color: rgba(27, 42, 74, 0.18);
+}
+
+.djo_star_on {
+	color: #E8A317;
+}
+
+.djo_star svg {
+	display: block;
+}
+
+/* ---------- The clinical icons ----------
+   Bitmaps at 2x, so they hold up on a retina screen. Sized here rather than in
+   the markup's width/height, which are only there to reserve the space. */
+
+.djo_icon {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+
+/* Site header: the floating stripe
+   ------------------------------------------------------------
+   A rounded bar inset from the edges of the window, holding the logo, the menu
+   and the tools - and on the home page it floats over the hero photograph
+   rather than sitting above it. Markup: orto-child/skins/default/templates/
+   header-navi.php, which overrides the parent's.
+
+   The logo comes from orto-child/images/logo-mark.png, fed to the theme through
+   the 'custom_logo' theme mod (see orto_child_use_bundled_logo). The pinning is
+   the child theme's own - the theme's fixed-header feature lives in the
+   trx_addons plugin, which this site does not run - and is driven by
+   js/header.js adding .djo_header_stuck to the body.
+
+   The measured height of the stripe is published as --djo-header-h so the
+   spacer below can hold its place, and so anchored headings clear it. That last
+   part matters more here than on most sites: every item in the mega menu is an
+   anchor into the middle of a long page.
+------------------------------------------------------------ */
+
+.top_panel_navi.djo_bar {
+	margin: 12px clamp(10px, 1.4vw, 20px) 0;
+	padding: 0 clamp(16px, 2vw, 30px);
+	border-radius: var(--djo-radius);
+	background-color: #ffffff;
+	box-shadow: var(--djo-shadow);
+	transition: background-color .35s ease, box-shadow .35s ease, padding .35s ease;
+}
+
+.djo_bar_inner {
+	display: flex;
+	align-items: center;
+	gap: clamp(12px, 2vw, 32px);
+	min-height: 76px;
+}
+
+/* The menu takes all the room left between the logo and the tools.
+
+   flex:1 rather than margin-left:auto for a specific reason: the theme's menu
+   script measures the nav's own width and folds any items that don't fit into a
+   "..." dropdown. Sized to its content, the nav reports barely enough room and
+   the last items get collapsed away on a 1440px screen. Given the whole gap to
+   measure, all five stay on the bar. */
+.djo_bar_menu {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+/* Items sit against the right-hand end of the bar.
+
+   Done with text-align + inline-block rather than flex on purpose: the theme
+   floats the top-level items, and a floated item in a flex container is taken
+   out of the flex flow entirely - the row stays left-packed however the
+   container is set. Clearing the float and letting them run as inline blocks
+   puts them under the control of text-align, which the theme does not fight. */
+.top_panel .djo_bar .djo_bar_menu > .sc_layouts_menu_nav {
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	text-align: right;
+}
+
+.top_panel .djo_bar .djo_bar_menu > .sc_layouts_menu_nav > li {
+	display: inline-block;
+	float: none;
+	text-align: left;
+	vertical-align: middle;
+}
+
+.djo_bar_menu .sc_layouts_menu_nav > li > a {
+	padding-right: clamp(8px, 0.9vw, 16px);
+	padding-left: clamp(8px, 0.9vw, 16px);
+	white-space: nowrap;
+}
+
+/* "Book Appointment" already sits in the tools as a real button, so the Contact
+   Us item in the menu stays an ordinary link rather than becoming a second pill
+   six pixels away from the first. The class is still applied by
+   orto_child_mark_menu_cta() - it is what the rule below hangs on. */
+.djo_bar_menu .sc_layouts_menu_nav > li.djo_menu_cta > a {
+	font-weight: 600;
+}
+
+/* ---------- The logo lockup ----------
+   Mark plus name, from skins/default/templates/header-logo.php. The mark alone
+   is a roundel with the clinic's name set in a ring around it - unreadable at
+   header size - so the name is set beside it in live text instead. */
+
+.djo_logo {
+	display: inline-flex;
+	align-items: center;
+	gap: 12px;
+	text-decoration: none;
+}
+
+.djo_logo_mark {
+	display: block;
+	flex: 0 0 auto;
+	width: clamp(44px, 4vw, 56px);
+	height: clamp(44px, 4vw, 56px);
+	border-radius: 50%;
+	object-fit: contain;
+	transition: width .35s ease, height .35s ease, opacity .3s ease;
+}
+
+.djo_logo:hover .djo_logo_mark {
+	opacity: 0.85;
+}
+
+.djo_logo_text {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+}
+
+/* "Dr. Jagadale's" - the small line above the wordmark, as on the signage. */
+.djo_logo_prefix {
+	color: var(--theme-color-meta);
+	font-size: 10.5px;
+	font-weight: 600;
+	line-height: 1.2;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+/* "Orthocare & Fracture Clinic" - the wordmark. nowrap because the two-part
+   lockup only works while each part holds its own line; left to wrap it becomes
+   the three-line block that splitting the name was meant to avoid. */
+.djo_logo_name {
+	color: var(--theme-color-title);
+	font-size: clamp(14px, 1.25vw, 17px);
+	font-weight: 700;
+	line-height: 1.2;
+	white-space: nowrap;
+}
+
+/* Below the desktop breakpoint the bar holds the lockup, a call button and the
+   burger. The tagline is the first thing to go. */
+/* On a phone the bar holds the lockup, a call button and the burger, and the
+   wordmark on one line is what has to give. The possessive goes first - it is
+   the least of the three lines - and the name is allowed to wrap. */
+@media (max-width: 767px) {
+	.djo_logo_prefix {
+		display: none;
+	}
+	.djo_logo_name {
+		max-width: 16ch;
+		font-size: 13px;
+		white-space: normal;
+	}
+}
+
+/* ---------- Tools: phone, book, mobile menu ---------- */
+
+/* margin-left:auto rather than relying on the menu to push these right. The
+   menu carries flex:1 and does the pushing on desktop, but it is display:none
+   below the tablet breakpoint - so on a phone the call button and the burger
+   would sit immediately after the logo with the rest of the bar empty. */
+.djo_bar_tools {
+	display: flex;
+	align-items: center;
+	gap: clamp(6px, 0.9vw, 14px);
+	margin-left: auto;
+}
+
+/* The number is written out, not hidden behind an icon. A clinic's phone number
+   is the single most useful thing in the header for someone in pain, and a bare
+   handset glyph makes them tap to find out what it is. */
+.djo_bar_phone {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 16px 8px 8px;
+	border-radius: 100px;
+	color: var(--theme-color-title);
+	transition: background-color .3s ease;
+}
+
+.djo_bar_phone:hover,
+.djo_bar_phone:focus-visible {
+	background-color: var(--djo-tint);
+}
+
+.djo_bar_phone_icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	background-color: var(--djo-tint);
+	color: var(--djo-blue);
+	transition: background-color .3s ease, color .3s ease;
+}
+
+.djo_bar_phone:hover .djo_bar_phone_icon {
+	background-color: var(--djo-blue);
+	color: #ffffff;
+}
+
+.djo_bar_phone_body {
+	display: flex;
+	flex-direction: column;
+	line-height: 1.25;
+}
+
+.djo_bar_phone_label {
+	color: var(--theme-color-meta);
+	font-size: 11px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.djo_bar_phone_number {
+	color: var(--theme-color-title);
+	font-size: 16px;
+	font-weight: 700;
+}
+
+/* The theme's own burger, shown only once the menu itself is hidden. */
+.djo_bar_burger {
+	display: none;
+}
+
+/* Below the desktop breakpoint the bar has to hold a logo, a way to call and a
+   way to open the menu, and nothing else fits. The Book button goes first - the
+   phone is the more urgent of the two, and the mobile menu carries a Contact Us
+   item anyway. */
+@media (max-width: 1199px) {
+	.djo_bar_cta {
+		display: none;
+	}
+}
+
+@media (max-width: 1023px) {
+	.djo_bar_burger {
+		display: inline-flex;
+	}
+	.djo_bar_phone_body {
+		display: none;
+	}
+	.djo_bar_phone {
+		padding: 0;
+	}
+}
+
+/* The marker js/header.js watches to know when the page has left the top. It is
+   1px rather than 0 because a zero-area target is an edge case in
+   IntersectionObserver, and the pixel is taken straight back with a negative
+   margin so it changes no layout. */
+.djo_header_sentinel {
+	height: 1px;
+	margin-bottom: -1px;
+	pointer-events: none;
+}
+
+/* ---------- Pinned state ---------- */
+
+/* The stripe stays a floating pill when it pins - it is the same object, now
+   following the reader - rather than snapping to a full-width bar, which reads
+   as a second, different header appearing. */
+.djo_header_stuck .top_panel_navi.djo_bar {
+	position: fixed;
+	z-index: 1000;
+	top: 12px;
+	right: clamp(10px, 1.4vw, 20px);
+	left: clamp(10px, 1.4vw, 20px);
+	margin: 0;
+	box-shadow: 0 12px 34px rgba(27, 42, 74, 0.14);
+	animation: djo_header_drop .4s ease both;
+}
+
+/* Off the home page the stripe is in the flow, so pinning it would pull the
+   page up by its height. This holds the space it left. */
+.djo_header_stuck .top_panel_default {
+	padding-top: var(--djo-header-h, 92px);
+}
+
+/* On the home page it was never in the flow - it floats over the hero - so
+   there is no gap to hold open. */
+body.home.djo_header_stuck .top_panel_default {
+	padding-top: 0;
+}
+
+.djo_header_stuck .djo_bar_inner {
+	min-height: 62px;
+}
+
+.djo_header_stuck .djo_logo_mark {
+	width: clamp(38px, 3.4vw, 46px);
+	height: clamp(38px, 3.4vw, 46px);
+}
+
+.admin-bar.djo_header_stuck .top_panel_navi.djo_bar {
+	top: 44px;
+}
+
+@media (max-width: 782px) {
+	.admin-bar.djo_header_stuck .top_panel_navi.djo_bar {
+		top: 58px;
+	}
+}
+
+/* Comes down from above rather than fading in on the spot: the movement is what
+   tells you the bar is now pinned rather than part of the page. */
+@keyframes djo_header_drop {
+	from {
+		transform: translateY(-100%);
+	}
+	to {
+		transform: translateY(0);
+	}
+}
+
+/* Anchored headings must clear the pinned bar instead of landing underneath it.
+   Every mega-menu item is an anchor into the middle of a long page, so this is
+   load-bearing here rather than a nicety. */
+:root {
+	scroll-behavior: smooth;
+}
+
+[id] {
+	scroll-margin-top: calc(var(--djo-header-h, 96px) + 24px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	:root {
+		scroll-behavior: auto;
+	}
+	.djo_header_stuck .top_panel_navi {
+		animation: none;
+	}
+	.djo_button:hover,
+	.djo_button:focus-visible {
+		transform: none;
+	}
+}
+
+
+/* The mega menu
+   ------------------------------------------------------------
+   Speciality and Services open a full-width panel rather than a column of
+   links. Markup and the reasoning for where it sits in the DOM:
+   skins/default/templates/header-navi.php. Behaviour: js/mega-menu.js.
+
+   The panel is positioned against .djo_bar, which is the bar's own box - so it
+   travels with the bar when it pins and needs no separate pinned-state rule.
+------------------------------------------------------------ */
+
+.djo_bar {
+	position: relative;
+}
+
+.djo_mega {
+	position: absolute;
+	z-index: 999;
+	top: calc(100% + 10px);
+	right: 0;
+	left: 0;
+	padding: clamp(24px, 2.4vw, 36px);
+	border-radius: var(--djo-radius);
+	background-color: #ffffff;
+	box-shadow: var(--djo-shadow-lift);
+	opacity: 0;
+	transform: translateY(-8px);
+	transition: opacity .22s ease, transform .22s ease;
+}
+
+/* [hidden] is what keeps the panel out of the accessibility tree and out of the
+   tab order while it is closed. It needs restating because the display:flex and
+   display:grid rules below would otherwise override the UA's [hidden] rule. */
+.djo_mega[hidden] {
+	display: none;
+}
+
+.djo_mega_open {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+/* No CSS-only fallback here, and that is deliberate. The panel is a sibling of
+   the menu, not a descendant of the item that opens it, so no selector can get
+   from one to the other - which is the same DOM position that lets it span the
+   window in the first place. What covers a visitor whose JavaScript never ran
+   is further down: .djo_has_mega is added by the script, so without it the
+   class is absent, the "hide the theme's dropdown" rule never matches, and the
+   parent theme's own dropdown does the job. Plainer, never broken. */
+
+.djo_mega_grid {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: clamp(18px, 2vw, 30px) clamp(20px, 2.4vw, 40px);
+}
+
+.djo_mega_col {
+	min-width: 0;
+}
+
+/* Icon and pill on one line, the way the reference layout has it. The whole
+   heading is one link, so the icon is part of the target rather than a
+   decoration beside it. */
+.djo_mega_head {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 12px;
+	text-decoration: none;
+}
+
+.djo_mega_head_icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 34px;
+	height: 34px;
+}
+
+.djo_mega_head_pill {
+	display: inline-block;
+	padding: 8px 15px;
+	border-radius: 100px;
+	background-color: var(--djo-blue);
+	color: #ffffff;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.25;
+	transition: background-color .25s ease;
+}
+
+.djo_mega_head:hover .djo_mega_head_pill,
+.djo_mega_head:focus-visible .djo_mega_head_pill {
+	background-color: var(--djo-navy);
+}
+
+.djo_mega_list {
+	list-style: none;
+	margin: 0;
+	padding: 0 0 0 44px;
+}
+
+.djo_mega_list li {
+	position: relative;
+	margin-bottom: 7px;
+}
+
+.djo_mega_list li::before {
+	content: "";
+	position: absolute;
+	top: 0.62em;
+	left: -13px;
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background-color: var(--djo-blue-bright);
+}
+
+.djo_mega_list a {
+	color: var(--theme-color-text);
+	font-size: 14.5px;
+	line-height: 1.45;
+	text-decoration: none;
+	transition: color .2s ease;
+}
+
+.djo_mega_list a:hover,
+.djo_mega_list a:focus-visible {
+	color: var(--djo-blue);
+}
+
+.djo_mega_foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20px;
+	margin-top: clamp(20px, 2vw, 28px);
+	padding-top: 18px;
+	border-top: 1px solid var(--theme-color-bd_color);
+}
+
+.djo_mega_foot_text {
+	margin: 0;
+	color: var(--theme-color-meta);
+	font-size: 14px;
+	line-height: 1.5;
+}
+
+.djo_mega_foot_link {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	flex: 0 0 auto;
+	color: var(--djo-blue);
+	font-size: 14px;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.djo_mega_foot_link svg {
+	width: 17px;
+	height: 17px;
+	transition: transform .25s ease;
+}
+
+.djo_mega_foot_link:hover svg {
+	transform: translateX(4px);
+}
+
+/* Services has eight entries of two or three lines each; three columns give
+   them a comfortable measure where four would leave every title wrapping. */
+.djo_mega_services .djo_mega_grid {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* The mega panel replaces the theme's own dropdown for these two items. The
+   sub-items are still real menu children - that is what gives the mobile menu
+   something to expand - so the parent's dropdown has to be told to stay shut
+   rather than opening underneath the panel. */
+.djo_bar_menu .djo_has_mega > ul,
+.djo_bar_menu .djo_has_mega .sc_layouts_menu_nav ul {
+	display: none !important;
+}
+
+/* Below the desktop breakpoint the whole bar menu is hidden and the theme's own
+   mobile menu takes over, so the panels must never appear. */
+@media (max-width: 1023px) {
+	.djo_mega {
+		display: none !important;
+	}
+}
+
+
+/* Home page (front-page.php)
+   ------------------------------------------------------------ */
+
+/* The home page opens with a photograph that the header stripe floats over, so
+   the header comes out of the flow and the hero starts at the very top of the
+   window. Taking the header out of the flow rather than pulling the hero up
+   under it with a negative margin is what keeps the stripe painting above the
+   photograph without a z-index fight. */
+body.home .top_panel {
+	position: absolute;
+	z-index: 20;
+	top: 0;
+	right: 0;
+	left: 0;
+	background-color: transparent;
+}
+
+/* The hero has to start where the window starts, so every wrapper between the
+   body and it gives up its top padding - on this page only. */
+body.home .page_content_wrap,
+body.home .page_content_wrap .content_wrap,
+body.home .page_content_wrap .content {
+	margin-top: 0;
+	padding-top: 0;
+}
+
+/* The closing call to action is a full-bleed band, so the theme's usual bottom
+   padding only opens a gap between it and the footer. */
+body.home .page_content_wrap {
+	padding-bottom: 0;
+}
+
+.djo_home {
+	padding-top: 0;
+}
+
+/* ---------- Full-bleed bands ----------
+   True edge to edge. The theme's own .alignfull leaves a small gutter each
+   side, which is right for a map sitting inside a page and wrong for a band
+   that is meant to run into the corners of the window. */
+
+.djo_hero.alignfull,
+.djo_cta.alignfull {
+	width: 100vw;
+	max-width: 100vw;
+	margin-right: calc(-50vw + 50%);
+	margin-left: calc(-50vw + 50%);
+}
+
+/* The theme's .content_wrap takes its width from its parent, and the parent is
+   now the whole window - so inside these bands it stopped constraining anything
+   and the hero copy ran into the left edge of the screen. Restated here against
+   the theme's own page-width variable, so a band that breaks out still sets its
+   text on the same measure as the rest of the page. */
+.djo_hero > .content_wrap,
+.djo_cta > .content_wrap {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: var(--theme-var-page_width, 1290px);
+	margin-right: auto;
+	margin-left: auto;
+	padding-right: clamp(20px, 4vw, 60px);
+	padding-left: clamp(20px, 4vw, 60px);
+}
+
+/* ---------- Hero ---------- */
+
+/* The padding at the top clears the floating header, which is out of the flow
+   above it and so reserves no space of its own. */
+.djo_hero {
+	position: relative;
+	padding: calc(var(--djo-header-h, 92px) + clamp(40px, 6vw, 96px)) 0 clamp(60px, 7vw, 110px);
+	overflow: hidden;
+	background-color: var(--djo-navy);
+	color: #ffffff;
+}
+
+.djo_hero_media {
+	position: absolute;
+	inset: 0;
+}
+
+.djo_hero_media img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: center 35%;
+}
+
+/* Two layers, not one: a flat wash to sink the photograph far enough for white
+   text to clear AA anywhere on it, and a gradient that deepens towards the left
+   where the copy actually sits. A single flat scrim heavy enough for the
+   brightest part of this photograph would have greyed the whole image out. */
+.djo_hero_media::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background:
+		linear-gradient(100deg, rgba(15, 25, 46, 0.93) 0%, rgba(15, 25, 46, 0.78) 45%, rgba(15, 25, 46, 0.55) 100%),
+		rgba(15, 25, 46, 0.2);
+}
+
+.djo_hero .content_wrap {
+	position: relative;
+	z-index: 1;
+}
+
+.djo_hero_body {
+	max-width: 720px;
+}
+
+.djo_hero_title {
+	margin: 0 0 20px;
+	color: #ffffff;
+	font-size: clamp(32px, 4.6vw, 60px);
+	line-height: 1.1;
+}
+
+.djo_hero_text {
+	margin: 0 0 32px;
+	max-width: 60ch;
+	color: rgba(255, 255, 255, 0.86);
+	font-size: clamp(16px, 1.3vw, 19px);
+	line-height: 1.65;
+}
+
+.djo_hero_actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 14px;
+}
+
+.djo_hero_rating {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin: 30px 0 0;
+	color: rgba(255, 255, 255, 0.82);
+	font-size: 15px;
+}
+
+.djo_hero_rating .djo_stars {
+	color: rgba(255, 255, 255, 0.3);
+}
+
+.djo_hero_rating strong {
+	color: #ffffff;
+}
+
+/* ---------- Trust strip ----------
+   Lifted over the join between the hero and the page below it, so it reads as
+   the answer to "is this the right place" before the visitor has to scroll. */
+
+.djo_trust {
+	position: relative;
+	z-index: 2;
+	margin-top: clamp(-70px, -5vw, -40px);
+}
+
+.djo_trust_grid {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 1px;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	border-radius: var(--djo-radius);
+	background-color: var(--theme-color-bd_color);
+	box-shadow: var(--djo-shadow-lift);
+}
+
+.djo_trust_item {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: clamp(22px, 2.4vw, 34px) clamp(18px, 2vw, 28px);
+	background-color: #ffffff;
+	text-align: center;
+}
+
+.djo_trust_value {
+	color: var(--djo-blue);
+	font-size: clamp(22px, 2.2vw, 30px);
+	font-weight: 700;
+	line-height: 1.1;
+}
+
+.djo_trust_label {
+	color: var(--theme-color-meta);
+	font-size: 14px;
+	line-height: 1.45;
+}
+
+/* ---------- Section rhythm ---------- */
+
+.djo_section {
+	padding: clamp(56px, 6vw, 96px) 0;
+}
+
+.djo_section_speciality {
+	padding-top: clamp(48px, 5vw, 80px);
+}
+
+/* ---------- Speciality cards ---------- */
+
+/* grid-auto-rows:1fr, not just stretch. Eight cards make two rows, and auto
+   rows are sized independently - so the taller titles in the second row set a
+   deeper row than the first and the grid stepped. One fraction each makes both
+   rows the height of the tallest card on the page. */
+.djo_cards {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	grid-auto-rows: 1fr;
+	gap: clamp(14px, 1.6vw, 24px);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.djo_card_link {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+	height: 100%;
+	padding: clamp(22px, 2.2vw, 32px) 18px;
+	border: 1px solid var(--theme-color-bd_color);
+	border-radius: var(--djo-radius);
+	background-color: #ffffff;
+	text-align: center;
+	text-decoration: none;
+	transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+}
+
+.djo_card_link:hover,
+.djo_card_link:focus-visible {
+	transform: translateY(-5px);
+	border-color: transparent;
+	box-shadow: var(--djo-shadow-lift);
+}
+
+.djo_card_icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 58px;
+	height: 58px;
+	border-radius: 50%;
+	background-color: var(--djo-tint);
+	padding: 12px;
+}
+
+.djo_card_title {
+	color: var(--theme-color-title);
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 1.35;
+}
+
+.djo_card_meta {
+	color: var(--theme-color-meta);
+	font-size: 13px;
+}
+
+/* ---------- Split band: image beside prose ---------- */
+
+.djo_about_band {
+	background-color: var(--djo-tint);
+}
+
+.djo_split {
+	display: grid;
+	grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+	gap: clamp(30px, 4vw, 64px);
+	align-items: center;
+}
+
+/* A fixed band rather than whatever proportions the file happens to have. The
+   photographs here are phone snaps of the clinic, and a portrait one left to its
+   natural height ran to twice the depth of the prose beside it and turned the
+   section into a picture with a caption. object-fit crops to the band instead. */
+.djo_split_media {
+	overflow: hidden;
+	border-radius: var(--djo-radius);
+	box-shadow: var(--djo-shadow);
+}
+
+.djo_split_media img {
+	display: block;
+	width: 100%;
+	height: clamp(260px, 26vw, 380px);
+	object-fit: cover;
+}
+
+.djo_split_title {
+	margin: 0 0 6px;
+	font-size: clamp(26px, 3vw, 38px);
+	line-height: 1.15;
+}
+
+.djo_split_creds {
+	margin: 0 0 22px;
+	color: var(--djo-blue);
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.djo_split_body p {
+	color: var(--theme-color-text);
+	line-height: 1.7;
+}
+
+.djo_split_facts {
+	list-style: none;
+	margin: 26px 0 0;
+	padding: 0;
+}
+
+.djo_split_facts li {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	margin-bottom: 12px;
+	color: var(--theme-color-title);
+	font-size: 15px;
+	line-height: 1.5;
+}
+
+.djo_split_facts svg {
+	flex: 0 0 auto;
+	margin-top: 2px;
+	color: var(--djo-blue);
+}
+
+.djo_split_actions {
+	margin: 28px 0 0;
+}
+
+/* ---------- Services grid ---------- */
+
+.djo_section_services {
+	background-color: #ffffff;
+}
+
+.djo_services_grid {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	grid-auto-rows: 1fr;
+	gap: clamp(16px, 1.8vw, 28px);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+/* A flex column so the card fills the row it is given rather than sitting at
+   its natural height inside a taller box. */
+.djo_service {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	padding: clamp(22px, 2.2vw, 30px);
+	border: 1px solid var(--theme-color-bd_color);
+	border-radius: var(--djo-radius);
+	background-color: #ffffff;
+	transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+}
+
+.djo_service:hover {
+	transform: translateY(-5px);
+	border-color: transparent;
+	box-shadow: var(--djo-shadow-lift);
+}
+
+.djo_service_icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 52px;
+	height: 52px;
+	margin-bottom: 16px;
+	padding: 9px;
+	border-radius: var(--djo-radius-sm);
+	background-color: var(--djo-tint);
+}
+
+.djo_service_title {
+	margin: 0 0 10px;
+	font-size: 18px;
+	line-height: 1.3;
+}
+
+.djo_service_title a {
+	color: var(--theme-color-title);
+	text-decoration: none;
+}
+
+.djo_service_title a:hover {
+	color: var(--djo-blue);
+}
+
+.djo_service_text {
+	margin: 0;
+	color: var(--theme-color-text);
+	font-size: 15px;
+	line-height: 1.6;
+}
+
+/* ---------- Reviews ---------- */
+
+.djo_reviews {
+	background-color: var(--djo-tint);
+}
+
+.djo_reviews_grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: clamp(16px, 1.8vw, 28px);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.djo_review {
+	display: flex;
+	flex-direction: column;
+	padding: clamp(24px, 2.4vw, 34px);
+	border-radius: var(--djo-radius);
+	background-color: #ffffff;
+	box-shadow: var(--djo-shadow);
+}
+
+/* text-align is restated because the parent theme sets blockquotes right-
+   aligned - which is a reasonable look for a pull quote in an article and quite
+   wrong for three review cards, where it left every line ragged down the left
+   edge. The padding and border go for the same reason: this is a card, not the
+   theme's indented, ruled quotation. */
+.djo_review_text {
+	margin: 16px 0 0;
+	padding: 0;
+	border: none;
+	text-align: left;
+	color: var(--theme-color-text);
+	font-size: 15.5px;
+	line-height: 1.7;
+}
+
+.djo_review_text p {
+	margin: 0;
+}
+
+/* margin-top:auto sets the attribution on the card's bottom edge, so three
+   reviews of different lengths still sign off on one line. */
+.djo_review_by {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	margin: auto 0 0;
+	padding-top: 20px;
+}
+
+.djo_review_name {
+	color: var(--theme-color-title);
+	font-weight: 600;
+}
+
+.djo_review_for {
+	color: var(--theme-color-meta);
+	font-size: 13px;
+}
+
+/* ---------- Call to action band ---------- */
+
+.djo_cta {
+	padding: clamp(52px, 6vw, 90px) 0;
+	background-color: var(--djo-navy);
+	color: #ffffff;
+}
+
+.djo_cta_inner {
+	max-width: 720px;
+	margin: 0 auto;
+	text-align: center;
+}
+
+.djo_cta_title {
+	margin: 0 0 16px;
+	color: #ffffff;
+	font-size: clamp(26px, 3.2vw, 42px);
+	line-height: 1.15;
+}
+
+.djo_cta_text {
+	margin: 0 0 32px;
+	color: rgba(255, 255, 255, 0.82);
+	font-size: clamp(15px, 1.2vw, 18px);
+	line-height: 1.65;
+}
+
+.djo_cta_actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 14px;
+}
+
+/* On the dark band the solid blue button has almost nothing to separate it from
+   the navy behind it, so it inverts: white ground, navy label. */
+.djo_cta .djo_button_solid {
+	background-color: #ffffff;
+	color: var(--djo-navy);
+}
+
+.djo_cta .djo_button_solid:hover,
+.djo_cta .djo_button_solid:focus-visible {
+	background-color: rgba(255, 255, 255, 0.88);
+	color: var(--djo-navy) !important;
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+}
+
+
+/* Speciality and Services pages
+   ------------------------------------------------------------
+   Both are rendered by orto_child_render_group_page() in inc/nav.php, so they
+   share one set of rules here too.
+------------------------------------------------------------ */
+
+/* The theme reserves a deep band under the header for its centred page title
+   (--theme-var-main_content_padding, 8rem on a desktop). These pages hide that
+   title - orto_child_hide_page_title() - and open with their own heading
+   instead, so the reserved band is 128px of nothing between the menu and the
+   first line of copy, on top of the hero's own 64px. The band is given up here
+   and the hero owns the space.
+
+   Contact Us is deliberately not in this list: it keeps the theme's title, so
+   the band is doing real work there. */
+body.page-template-template-speciality .page_content_wrap,
+body.page-template-template-services .page_content_wrap,
+body.page-template-template-about .page_content_wrap {
+	padding-top: 0;
+}
+
+.djo_page_hero {
+	padding: clamp(40px, 4vw, 64px) 0 clamp(28px, 3vw, 44px);
+}
+
+.djo_page_hero .djo_head {
+	margin-bottom: clamp(26px, 2.6vw, 38px);
+}
+
+/* ---------- The contents nav ----------
+   These pages run to eight sections. Without this, reaching the last one means
+   scrolling past the other seven. */
+
+.djo_jump_list {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 10px;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.djo_jump_link {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 16px 8px 8px;
+	border: 1px solid var(--theme-color-bd_color);
+	border-radius: 100px;
+	background-color: #ffffff;
+	color: var(--theme-color-title);
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.3;
+	text-decoration: none;
+	transition: border-color .25s ease, background-color .25s ease, color .25s ease;
+}
+
+.djo_jump_link:hover,
+.djo_jump_link:focus-visible {
+	border-color: var(--djo-blue);
+	background-color: var(--djo-tint);
+	color: var(--djo-blue);
+}
+
+.djo_jump_icon {
+	flex: 0 0 auto;
+	width: 26px;
+	height: 26px;
+}
+
+/* ---------- One section per entry ----------
+   Alternating tint rather than a rule between them: at this length a page of
+   eight identical white blocks reads as one undifferentiated wall. */
+
+/* These sections sit inside the page container, not across the window, so the
+   tinted ones are rounded and inset rather than run to a hard square edge
+   partway across the screen. The horizontal padding is carried by both so the
+   text of a plain section and a tinted one still start on the same line. */
+.djo_entry {
+	padding: clamp(30px, 3.4vw, 48px) clamp(18px, 2.4vw, 40px);
+	border-radius: var(--djo-radius);
+}
+
+.djo_entry_alt {
+	background-color: var(--djo-tint);
+}
+
+.djo_entry_inner {
+	max-width: 860px;
+	margin: 0 auto;
+}
+
+.djo_entry_head {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	margin-bottom: 18px;
+}
+
+.djo_entry_icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 62px;
+	height: 62px;
+	padding: 12px;
+	border-radius: 50%;
+	background-color: #ffffff;
+	box-shadow: var(--djo-shadow);
+}
+
+.djo_entry_alt .djo_entry_icon {
+	background-color: #ffffff;
+}
+
+.djo_entry_title {
+	margin: 0;
+	font-size: clamp(22px, 2.4vw, 30px);
+	line-height: 1.2;
+}
+
+.djo_entry_text {
+	margin: 0 0 26px;
+	color: var(--theme-color-text);
+	font-size: 16.5px;
+	line-height: 1.7;
+}
+
+.djo_entry_subtitle {
+	margin: 0 0 14px;
+	color: var(--theme-color-meta);
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+.djo_entry_list {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px 24px;
+	list-style: none;
+	margin: 0 0 28px;
+	padding: 0;
+}
+
+.djo_entry_list li {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	color: var(--theme-color-title);
+	font-size: 15.5px;
+	line-height: 1.5;
+}
+
+.djo_entry_tick {
+	display: inline-flex;
+	flex: 0 0 auto;
+	margin-top: 1px;
+	color: var(--djo-blue);
+}
+
+.djo_entry_tick svg {
+	width: 19px;
+	height: 19px;
+}
+
+.djo_entry_actions {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 16px 22px;
+	margin: 0;
+}
+
+.djo_entry_phone {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--theme-color-title);
+	font-size: 15px;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.djo_entry_phone svg {
+	color: var(--djo-blue);
+}
+
+.djo_entry_phone:hover {
+	color: var(--djo-blue);
+}
+
+
+/* About page (template-about.php)
+   ------------------------------------------------------------ */
+
+.djo_page_about .djo_section {
+	padding: clamp(48px, 5vw, 84px) 0;
+}
+
+/* ---------- Qualifications ---------- */
+
+.djo_timeline {
+	list-style: none;
+	max-width: 760px;
+	margin: 0 auto;
+	padding: 0;
+	counter-reset: none;
+}
+
+.djo_timeline_item {
+	display: flex;
+	align-items: baseline;
+	gap: clamp(16px, 2.4vw, 36px);
+	padding: 22px 0;
+	border-bottom: 1px solid var(--theme-color-bd_color);
+}
+
+.djo_timeline_item:first-child {
+	padding-top: 0;
+}
+
+.djo_timeline_item:last-child {
+	border-bottom: none;
+}
+
+/* Fixed width so the three years form a column the eye can run down, rather
+   than each one starting wherever its own digits happen to end. */
+.djo_timeline_year {
+	flex: 0 0 auto;
+	width: 72px;
+	color: var(--djo-blue);
+	font-size: 19px;
+	font-weight: 700;
+}
+
+.djo_timeline_body {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	min-width: 0;
+}
+
+.djo_timeline_title {
+	color: var(--theme-color-title);
+	font-size: 17px;
+	font-weight: 600;
+	line-height: 1.35;
+}
+
+.djo_timeline_place {
+	color: var(--theme-color-meta);
+	font-size: 15px;
+}
+
+/* ---------- What we stand for ---------- */
+
+.djo_values {
+	background-color: var(--djo-tint);
+}
+
+.djo_values_grid,
+.djo_facilities_grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: clamp(16px, 2vw, 30px);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.djo_value {
+	padding: clamp(24px, 2.4vw, 34px);
+	border-radius: var(--djo-radius);
+	background-color: #ffffff;
+	box-shadow: var(--djo-shadow);
+}
+
+.djo_value_icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 50px;
+	height: 50px;
+	margin-bottom: 16px;
+	border-radius: 50%;
+	background-color: var(--djo-tint);
+	color: var(--djo-blue);
+}
+
+.djo_value_icon svg {
+	width: 24px;
+	height: 24px;
+}
+
+.djo_value_title {
+	margin: 0 0 10px;
+	font-size: 19px;
+	line-height: 1.3;
+}
+
+.djo_value_text {
+	margin: 0;
+	color: var(--theme-color-text);
+	font-size: 15px;
+	line-height: 1.65;
+}
+
+/* ---------- Facilities ---------- */
+
+.djo_facility {
+	overflow: hidden;
+	border: 1px solid var(--theme-color-bd_color);
+	border-radius: var(--djo-radius);
+	background-color: #ffffff;
+}
+
+/* A fixed band rather than whatever proportions the files happen to have: the
+   three photographs are from different sources and different shapes, and left
+   to themselves they would set three different card heights. */
+.djo_facility_media {
+	display: block;
+	height: clamp(160px, 16vw, 220px);
+	background-color: var(--djo-tint);
+}
+
+.djo_facility_media img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.djo_facility_title {
+	margin: 20px 24px 8px;
+	font-size: 18px;
+	line-height: 1.3;
+}
+
+.djo_facility_text {
+	margin: 0 24px 24px;
+	color: var(--theme-color-text);
+	font-size: 15px;
+	line-height: 1.6;
+}
+
+
+/* Contact Us page (template-contact.php)
+   ------------------------------------------------------------
+   Uses the theme's own design tokens (redefined at the top of this file) so
+   this page matches the rest of the site. Input colour, border, radius, padding
+   and font-size are left to the theme's own input styling, so the fields match
+   every other form on the site rather than inventing a second look.
+------------------------------------------------------------ */
+
+/* stretch, not start: both columns run to the same height, so the details
+   column and the form card finish on one line instead of one hanging below the
+   other. Each column then pins its last block to the bottom (consulting hours
+   on the left, the submit button on the right) so the two bottom edges agree
+   rather than leaving a ragged gap. */
+.contact_page .contact_layout {
+	display: grid;
+	grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+	gap: 60px;
+	align-items: stretch;
+}
+
+.contact_page .contact_details {
+	display: flex;
+	flex-direction: column;
+}
+
+/* ---------- Left column: details ---------- */
+
+.contact_page .contact_eyebrow {
+	margin-bottom: 25px;
+}
+
+.contact_page .contact_intro {
+	margin-bottom: 40px;
+}
+
+.contact_page .contact_intro p:last-child {
+	margin-bottom: 0;
+}
+
+.contact_page .contact_details_list {
+	list-style: none;
+	margin: 0 0 30px;
+	padding: 0;
+}
+
+.contact_page .contact_details_item {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+	padding: 20px 0;
+	border-bottom: 1px solid var(--theme-color-bd_color);
+}
+
+.contact_page .contact_details_item:first-child {
+	padding-top: 0;
+}
+
+.contact_page .contact_details_icon {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	background-color: var(--theme-color-bg_color_2);
+	color: var(--theme-color-link);
+}
+
+.contact_page .contact_details_body {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+	padding-top: 3px;
+}
+
+.contact_page .contact_details_label {
+	color: var(--theme-color-meta);
+	font-size: 12px;
+	line-height: 1.4;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.contact_page .contact_details_value {
+	color: var(--theme-color-title);
+	font-size: 16px;
+	line-height: 1.5;
+	overflow-wrap: anywhere;
+}
+
+.contact_page a.contact_details_value:hover {
+	color: var(--theme-color-link);
+}
+
+/* ---------- Social ---------- */
+
+/* Sits under the Consulting Hours card, so the spacing is above it rather than
+   below - it is the last thing in the column. */
+.contact_page .contact_social {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 24px;
+}
+
+.contact_page .contact_social_link {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 18px;
+	border: 1px solid var(--theme-color-bd_color);
+	border-radius: 100px;
+	color: var(--theme-color-title);
+	font-size: 15px;
+	line-height: 1.4;
+	transition: border-color .3s ease, color .3s ease, background-color .3s ease;
+}
+
+.contact_page .contact_social_link:hover {
+	border-color: var(--theme-color-link);
+	background-color: var(--theme-color-bg_color_2);
+	color: var(--theme-color-link);
+}
+
+.contact_page .contact_social_icon {
+	display: inline-flex;
+	color: var(--theme-color-link);
+}
+
+/* ---------- Consulting hours ---------- */
+
+/* margin-top:auto pushes this and the social links below it down to the foot of
+   the column, so the group lines up with the bottom of the form card opposite. */
+.contact_page .contact_hours {
+	margin-top: auto;
+	padding: 30px;
+	border-radius: var(--djo-radius);
+	background-color: var(--theme-color-bg_color_2);
+}
+
+.contact_page .contact_hours_title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0 0 18px;
+	font-size: 19px;
+	line-height: 1.3;
+}
+
+.contact_page .contact_hours_icon {
+	display: inline-flex;
+	color: var(--theme-color-link);
+}
+
+.contact_page .contact_hours_list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.contact_page .contact_hours_item {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 10px 0;
+	border-bottom: 1px solid var(--theme-color-bd_color);
+}
+
+.contact_page .contact_hours_item:first-child {
+	padding-top: 0;
+}
+
+.contact_page .contact_hours_item:last-child {
+	padding-bottom: 0;
+	border-bottom: none;
+}
+
+.contact_page .contact_hours_label {
+	color: var(--theme-color-title);
+}
+
+.contact_page .contact_hours_value {
+	color: var(--theme-color-text);
+	white-space: nowrap;
+}
+
+.contact_page .contact_hours_item_closed .contact_hours_value {
+	color: var(--theme-color-meta);
+}
+
+.contact_page .contact_hours_fee {
+	margin: 18px 0 0;
+	padding-top: 16px;
+	border-top: 1px solid var(--theme-color-bd_color);
+	color: var(--theme-color-title);
+	font-size: 15px;
+	font-weight: 600;
+}
+
+/* ---------- Full-bleed map band ----------
+   Sits below the two-column layout and breaks out of the page container via the
+   theme's own .alignfull class. Height is fixed rather than an aspect ratio: at
+   100vw a ratio makes the band absurdly tall on wide monitors and too short to
+   read on small ones. clamp() keeps it a readable strip at every width.
+------------------------------------------------------------ */
+
+.contact_page .contact_map {
+	position: relative;
+	margin-top: 70px;
+}
+
+.contact_page .contact_map_frame {
+	overflow: hidden;
+	height: clamp(320px, 34vw, 480px);
+	background-color: var(--theme-color-bg_color_2);
+}
+
+.contact_page .contact_map_frame iframe {
+	display: block;
+	width: 100%;
+	height: 100%;
+	border: none;
+}
+
+/* Floating "Get Directions" button over the bottom-right of the map, clear of
+   Google's own controls on the left and the attribution strip along the base. */
+.contact_page .contact_map_directions {
+	position: absolute;
+	right: clamp(16px, 4vw, 60px);
+	bottom: clamp(46px, 6vw, 70px);
+	z-index: 2;
+	margin: 0;
+}
+
+@media (max-width: 767px) {
+	.contact_page .contact_map {
+		margin-top: 50px;
+	}
+	.contact_page .contact_map_frame {
+		height: 300px;
+	}
+	.contact_page .contact_map_directions {
+		right: 50%;
+		bottom: 20px;
+		transform: translateX(50%);
+	}
+}
+
+/* ---------- Right column: form card ---------- */
+
+/* A flex column so the form inside can fill the card's full height - that is
+   what lets the submit button sit on the card's bottom edge and line up with
+   the consulting hours opposite. */
+.contact_form_wrap {
+	display: flex;
+	flex-direction: column;
+	padding: 40px;
+	border: 1px solid var(--theme-color-bd_color);
+	border-radius: var(--djo-radius);
+	background-color: var(--theme-color-bg_color);
+}
+
+.contact_form_wrap .contact_form {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+}
+
+.contact_form_wrap .contact_form_title {
+	margin: 0 0 8px;
+	font-size: 28px;
+	line-height: 1.2;
+}
+
+.contact_form_wrap .contact_form_subtitle {
+	margin-bottom: 30px;
+	color: var(--theme-color-meta);
+}
+
+.contact_form_wrap .contact_form_notice {
+	margin-bottom: 25px;
+	padding: 16px 20px;
+	border-radius: var(--djo-radius-sm);
+	border-left: 3px solid currentColor;
+}
+
+.contact_form_wrap .contact_form_notice_success {
+	background-color: #EDF5EE;
+	color: #2F6B3E;
+}
+
+.contact_form_wrap .contact_form_notice_error {
+	background-color: #FBECEC;
+	color: #9B2C32;
+}
+
+/* Honeypot: hidden from people, still reachable by bots. */
+.contact_form_wrap .contact_form_hp {
+	position: absolute !important;
+	left: -9999px !important;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+.contact_form_wrap .contact_form_grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 20px;
+}
+
+.contact_form_wrap .contact_form_row {
+	margin: 0;
+	min-width: 0;
+}
+
+.contact_form_wrap .contact_form_row_full {
+	grid-column: 1 / -1;
+}
+
+.contact_form_wrap .contact_form_row label {
+	display: block;
+	margin-bottom: 8px;
+	color: var(--theme-color-title);
+	font-size: 15px;
+	line-height: 1.4;
+}
+
+.contact_form_wrap .contact_form_row .required {
+	color: var(--djo-red);
+}
+
+/* Only layout here on purpose: colour, border, radius, padding and font-size
+   come from the theme's own input styling. */
+.contact_form_wrap .contact_form_row input,
+.contact_form_wrap .contact_form_row textarea {
+	display: block;
+	width: 100%;
+}
+
+.contact_form_wrap .contact_form_row textarea {
+	min-height: 150px;
+	resize: vertical;
+}
+
+/* margin-top:auto pushes the button to the foot of the card whenever the details
+   column opposite is the taller of the two. The gap above it comes from padding
+   rather than margin, because an auto margin collapses to zero when there is no
+   slack to absorb - which would leave the button touching the message field. */
+.contact_form_wrap .contact_form_submit {
+	margin: auto 0 0;
+	padding-top: 30px;
+}
+
+.contact_form_wrap .contact_form_note {
+	margin: 14px 0 0;
+	color: var(--theme-color-meta);
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+/* The submitted/failed message. It is the first thing the page has to say after
+   a submission, and focus is moved to it, so it needs a visible outline of its
+   own rather than the browser's default on a non-interactive element. */
+.contact_form_wrap .contact_form_notice:focus {
+	outline: 2px solid var(--theme-color-hover);
+	outline-offset: 3px;
+}
+
+
+/* Site footer (templates/footer-jagadale.php)
+   ------------------------------------------------------------
+   Replaces the parent theme's widget-driven footer. Dark band, logo on its own
+   line, three columns below it, then a rule and the small print.
+
+   Colours are set literally rather than through the theme's --theme-color-*
+   vars: those follow whichever colour scheme the page is using, and the footer
+   has to stay dark on every page regardless.
+------------------------------------------------------------ */
+
+.footer_jagadale {
+	--djo-footer-bg: #131C2F;
+	--djo-footer-text: #A7B0C2;
+	--djo-footer-heading: #ffffff;
+	--djo-footer-rule: rgba(255, 255, 255, 0.12);
+	padding: 70px 0 40px;
+	background-color: var(--djo-footer-bg);
+	color: var(--djo-footer-text);
+	font-size: 15px;
+	line-height: 1.7;
+}
+
+.footer_jagadale a {
+	color: var(--djo-footer-text);
+	text-decoration: none;
+	transition: color 0.2s ease;
+}
+
+.footer_jagadale a:hover,
+.footer_jagadale a:focus-visible {
+	color: var(--djo-footer-heading);
+}
+
+.footer_jagadale .djo_footer_title {
+	margin: 0 0 25px;
+	color: var(--djo-footer-heading);
+	font-size: 20px;
+	line-height: 1.3;
+}
+
+/* ---------- Logo ---------- */
+
+/* Mark and wordmark side by side. The mark is a photograph of the clinic's
+   painted sign rather than a vector, so it is given a white disc to sit on -
+   its own background is white and would otherwise show as a pale square on the
+   dark band. Replace images/logo-mark.png with a transparent SVG and this rule
+   becomes the disc it was always meant to be. */
+.footer_jagadale .djo_footer_logo {
+	display: inline-flex;
+	align-items: center;
+	gap: 16px;
+	margin-bottom: 45px;
+}
+
+.footer_jagadale .djo_footer_logo img {
+	display: block;
+	flex: 0 0 auto;
+	width: 76px;
+	height: 76px;
+	border-radius: 50%;
+	background-color: #ffffff;
+	object-fit: contain;
+}
+
+.footer_jagadale .djo_footer_logo_text {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+
+.footer_jagadale .djo_footer_logo_name {
+	color: var(--djo-footer-heading);
+	font-size: clamp(17px, 1.6vw, 21px);
+	line-height: 1.25;
+}
+
+.footer_jagadale .djo_footer_logo_tagline {
+	color: var(--djo-footer-text);
+	font-size: 13px;
+	font-style: italic;
+	letter-spacing: 0.04em;
+}
+
+/* ---------- Columns ---------- */
+
+/* The Contact column carries the longest strings on the page (the address and
+   the email), so it gets more room than the Pages list beside it. */
+.footer_jagadale .djo_footer_columns {
+	display: grid;
+	grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.7fr) minmax(0, 1.25fr);
+	gap: 40px 55px;
+	align-items: start;
+}
+
+.footer_jagadale .djo_footer_about_text {
+	margin: 0 0 30px;
+	max-width: 44ch;
+}
+
+.footer_jagadale .djo_footer_socials {
+	display: flex;
+	gap: 12px;
+}
+
+/* A hairline ring on the dark band, not a white disc. The mark takes its colour
+   from the footer text, and the ring gives it the same standing-control shape
+   the header tools use. */
+.footer_jagadale .djo_footer_social {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	border: 1px solid var(--djo-footer-rule);
+	border-radius: 50%;
+}
+
+.footer_jagadale .djo_footer_social:hover {
+	border-color: var(--djo-footer-heading);
+}
+
+.footer_jagadale .djo_footer_menu,
+.footer_jagadale .djo_footer_contacts {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.footer_jagadale .djo_footer_menu_item + .djo_footer_menu_item {
+	margin-top: 10px;
+}
+
+.footer_jagadale .djo_footer_contact {
+	display: flex;
+	/* flex-start, not center: the address wraps to three lines in a narrow
+	   column and the icon should stay with the first line, not float to the
+	   middle of the block. */
+	align-items: flex-start;
+	gap: 10px;
+	min-width: 0;
+}
+
+.footer_jagadale .djo_footer_contact + .djo_footer_contact {
+	margin-top: 14px;
+}
+
+/* The email is one long word with no natural break point, so it has to be
+   allowed to break mid-string or it overflows the column. */
+.footer_jagadale .djo_footer_contact a {
+	min-width: 0;
+	overflow-wrap: anywhere;
+	transition: color .3s ease;
+}
+
+.footer_jagadale .djo_footer_contact_text {
+	min-width: 0;
+}
+
+.footer_jagadale .djo_footer_contact_sep {
+	padding: 0 4px;
+	opacity: 0.5;
+}
+
+.footer_jagadale .djo_footer_hours_line {
+	display: block;
+}
+
+/* The glyphs sat bare against the dark band with nothing to hold them, so they
+   read as marks in the text rather than as the standing controls they sit
+   beside. A tinted disc gives them the same shape the header tools and the
+   Contact page's detail icons already use.
+
+   28px against a 24px line box, so it stays level with the first line of the
+   address rather than towering over it. */
+.footer_jagadale .djo_footer_contact_icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	background-color: rgba(255, 255, 255, 0.07);
+	color: var(--djo-blue-bright);
+	transition: background-color .3s ease, color .3s ease, transform .3s ease;
+}
+
+.footer_jagadale .djo_footer_contact_icon svg {
+	width: 17px;
+	height: 17px;
+}
+
+/* Driven from the row, not the link. The icon is a sibling of the anchor and
+   aria-hidden, so it cannot be reached from a:hover - and hovering anywhere
+   along the line is what a visitor expects to acknowledge them. */
+.footer_jagadale .djo_footer_contact:hover .djo_footer_contact_icon,
+.footer_jagadale .djo_footer_contact:focus-within .djo_footer_contact_icon {
+	transform: translateY(-1px);
+	background-color: var(--djo-blue-bright);
+	color: #ffffff;
+}
+
+.footer_jagadale .djo_footer_contact:hover a,
+.footer_jagadale .djo_footer_contact a:focus-visible {
+	color: var(--djo-footer-heading);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.footer_jagadale .djo_footer_contact:hover .djo_footer_contact_icon,
+	.footer_jagadale .djo_footer_contact:focus-within .djo_footer_contact_icon {
+		transform: none;
+	}
+}
+
+/* ---------- Registered practice details ---------- */
+
+/* Leads the contact column. Set a step smaller than body copy so it still reads
+   as registration detail rather than as a headline. */
+.footer_jagadale .djo_footer_legal_block {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin: 0 0 22px;
+	color: var(--djo-footer-text);
+	font-size: 13px;
+	line-height: 1.6;
+	opacity: 0.85;
+}
+
+.footer_jagadale .djo_footer_legal_name {
+	color: var(--djo-footer-heading);
+	font-size: 12px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.footer_jagadale .djo_footer_legal_line {
+	overflow-wrap: anywhere;
+}
+
+/* ---------- Bottom bar ---------- */
+
+.footer_jagadale .djo_footer_bottom {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 18px 40px;
+	margin-top: 65px;
+	padding-top: 28px;
+	border-top: 1px solid var(--djo-footer-rule);
+	font-size: 14px;
+}
+
+.footer_jagadale .djo_footer_copyright {
+	margin: 0;
+}
+
+/* The medical disclaimer. Quieter than the copyright above it - it is a legal
+   necessity rather than something anyone is meant to read twice - but not so
+   quiet that it stops being legible. */
+.footer_jagadale .djo_footer_disclaimer {
+	margin: 8px 0 0;
+	max-width: 62ch;
+	font-size: 13px;
+	line-height: 1.55;
+	opacity: 0.75;
+}
+
+.footer_jagadale .djo_footer_bottom_links {
+	display: flex;
+	flex: 0 0 auto;
+	gap: 25px;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+
+/* Responsive
+   ------------------------------------------------------------
+   One block at the end rather than a query beside every rule, so the breakpoints
+   can be read as a set and kept consistent.
+------------------------------------------------------------ */
+
+@media (max-width: 1199px) {
+	.djo_mega_grid,
+	.djo_mega_services .djo_mega_grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+	.djo_cards,
+	.djo_services_grid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 1023px) {
+	.djo_trust_grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	.djo_split {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	/* The photograph reads as an illustration of the text, so it follows it
+	   rather than opening the section on a page where the text is the point. */
+	.djo_split_media {
+		order: 2;
+	}
+	.djo_values_grid,
+	.djo_facilities_grid,
+	.djo_reviews_grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	.contact_page .contact_layout {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 50px;
+	}
+	.footer_jagadale .djo_footer_columns {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	}
+	.footer_jagadale .djo_footer_col_about {
+		grid-column: 1 / -1;
+	}
+}
+
+@media (max-width: 767px) {
+	.djo_cards,
+	.djo_services_grid,
+	.djo_values_grid,
+	.djo_facilities_grid,
+	.djo_reviews_grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.djo_trust {
+		margin-top: 0;
+	}
+	.djo_trust_grid {
+		box-shadow: none;
+	}
+	.djo_entry_list {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.djo_entry_head {
+		gap: 12px;
+	}
+	.djo_entry_icon {
+		width: 50px;
+		height: 50px;
+		padding: 9px;
+	}
+	.djo_hero_actions .djo_button,
+	.djo_cta_actions .djo_button {
+		flex: 1 1 auto;
+	}
+	.djo_timeline_item {
+		flex-direction: column;
+		gap: 4px;
+	}
+	.contact_form_wrap {
+		padding: 25px 20px;
+	}
+	.contact_form_wrap .contact_form_grid {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 18px;
+	}
+	.contact_page .contact_hours {
+		padding: 22px 20px;
+	}
+	.contact_page .contact_hours_item {
+		flex-direction: column;
+		gap: 2px;
+	}
+	.contact_page .contact_details_icon {
+		width: 40px;
+		height: 40px;
+	}
+	.footer_jagadale {
+		padding: 50px 0 35px;
+	}
+	.footer_jagadale .djo_footer_columns {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 35px;
+	}
+	.footer_jagadale .djo_footer_logo {
+		margin-bottom: 35px;
+	}
+	.footer_jagadale .djo_footer_bottom {
+		flex-direction: column;
+		margin-top: 45px;
+	}
+}
