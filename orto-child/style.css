@@ -189,7 +189,8 @@ body.scheme_default {
 /* On a dark band the solid button is white, so a white sheen is invisible.
    The light becomes a shadow instead - the same gesture, inverted. */
 .djo_band_dark .djo_button_solid::before,
-.djo_band_deep .djo_button_solid::before {
+.djo_band_deep .djo_button_solid::before,
+.djo_band_accent .djo_button_solid::before {
 	background: linear-gradient(100deg, transparent, rgba(16, 25, 43, 0.16), transparent);
 }
 
@@ -275,13 +276,29 @@ body.scheme_default {
 	color: rgba(255, 255, 255, 0.78);
 }
 
+/* The accent band. The call to action, and the only band on the site painted
+   in the brand blue.
+   
+   Being the only one is the whole point twice over. It is what makes the
+   closing action impossible to miss on a page of white and near-black - the
+   eye finds the one saturated thing on the page before it reads a word of it.
+   And because it is neither light nor dark, it sits outside the alternation
+   entirely, so it can never be the band that breaks the rhythm no matter what
+   precedes it. */
+.djo_band_accent {
+	--djo-band-bg: var(--djo-blue);
+	background-color: var(--djo-blue);
+	color: rgba(255, 255, 255, 0.86);
+}
+
 /* ---------- What a dark band does to everything inside it ----------
    Written once, here, rather than by giving each component a dark variant of
    its own. Any section can be flipped by changing one class in the template and
    everything in it follows. */
 
 .djo_band_dark,
-.djo_band_deep {
+.djo_band_deep,
+.djo_band_accent {
 	--djo-rule: var(--djo-rule-dark);
 	--theme-color-bd_color: rgba(255, 255, 255, 0.14);
 	--theme-color-title: #ffffff;
@@ -292,17 +309,20 @@ body.scheme_default {
 }
 
 .djo_band_dark .djo_eyebrow,
-.djo_band_deep .djo_eyebrow {
+.djo_band_deep .djo_eyebrow,
+.djo_band_accent .djo_eyebrow {
 	color: rgba(255, 255, 255, 0.55);
 }
 
 .djo_band_dark .djo_head_title,
-.djo_band_deep .djo_head_title {
+.djo_band_deep .djo_head_title,
+.djo_band_accent .djo_head_title {
 	color: #ffffff;
 }
 
 .djo_band_dark .djo_head_text,
-.djo_band_deep .djo_head_text {
+.djo_band_deep .djo_head_text,
+.djo_band_accent .djo_head_text {
 	color: rgba(255, 255, 255, 0.72);
 }
 
@@ -311,14 +331,16 @@ body.scheme_default {
    invert(1) takes that to white - so one filter whitens the whole set without a
    second copy of every file. */
 .djo_band_dark .djo_icon,
-.djo_band_deep .djo_icon {
+.djo_band_deep .djo_icon,
+.djo_band_accent .djo_icon {
 	filter: brightness(0) invert(1);
 	opacity: 0.92;
 }
 
 /* On dark, the outline button's hairline is the only thing describing it. */
 .djo_band_dark .djo_button_outline,
-.djo_band_deep .djo_button_outline {
+.djo_band_deep .djo_button_outline,
+.djo_band_accent .djo_button_outline {
 	border-color: rgba(255, 255, 255, 0.4);
 	color: #ffffff;
 }
@@ -326,7 +348,9 @@ body.scheme_default {
 .djo_band_dark .djo_button_outline:hover,
 .djo_band_dark .djo_button_outline:focus-visible,
 .djo_band_deep .djo_button_outline:hover,
-.djo_band_deep .djo_button_outline:focus-visible {
+.djo_band_deep .djo_button_outline:focus-visible,
+.djo_band_accent .djo_button_outline:hover,
+.djo_band_accent .djo_button_outline:focus-visible {
 	border-color: #ffffff;
 	background-color: rgba(255, 255, 255, 0.1);
 	color: #ffffff !important;
@@ -424,7 +448,8 @@ body.scheme_default {
 /* The solid blue button has almost nothing to separate it from a near-black
    ground, so on dark it inverts: white ground, dark label. */
 .djo_band_dark .djo_button_solid,
-.djo_band_deep .djo_button_solid {
+.djo_band_deep .djo_button_solid,
+.djo_band_accent .djo_button_solid {
 	background-color: #ffffff;
 	color: var(--djo-ink);
 }
@@ -432,7 +457,9 @@ body.scheme_default {
 .djo_band_dark .djo_button_solid:hover,
 .djo_band_dark .djo_button_solid:focus-visible,
 .djo_band_deep .djo_button_solid:hover,
-.djo_band_deep .djo_button_solid:focus-visible {
+.djo_band_deep .djo_button_solid:focus-visible,
+.djo_band_accent .djo_button_solid:hover,
+.djo_band_accent .djo_button_solid:focus-visible {
 	background-color: rgba(255, 255, 255, 0.86);
 	color: var(--djo-ink) !important;
 	box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
@@ -514,6 +541,18 @@ body.scheme_default {
 	width: 18px;
 	height: 18px;
 	flex: 0 0 auto;
+}
+
+/* One size up, for the single action a page is actually pointing at. Nothing
+   else on the site uses it - a page with two large buttons has none. */
+.djo_button_lg {
+	padding: 17px 34px;
+	font-size: 16px;
+}
+
+.djo_button_lg svg {
+	width: 19px;
+	height: 19px;
 }
 
 .djo_button_solid {
@@ -2106,39 +2145,45 @@ body.home .page_content_wrap {
 
 
 /* ---------- Call to action band ----------
-   White, not the near-black it used to be. It sits directly under the reviews,
-   which are dark, and the page's last word should be the brightest thing on it
-   rather than a second dark band the eye slides off.
+   Brand blue, and the only band on the site painted in it. Everything else is
+   white or near-black, so on a page of two values one saturated field is found
+   before a word of it is read - which is the whole job of a closing action.
 
-   It carries a little more furniture than the other light bands so it still
-   reads as an ending: a rule above the buttons, and the spine watermark drawn
-   in ink rather than white.
+   It also sits outside the light/dark alternation, so it cannot be the band
+   that breaks the rhythm whatever precedes it.
 ------------------------------------------------------------ */
 
 .djo_cta {
 	overflow: hidden;
+	/* A shade deeper than the flat blue at the foot, so the band has weight
+	   under it and does not read as a flat rectangle of colour. */
+	background-image: linear-gradient(170deg, rgba(255, 255, 255, 0.06) 0%, rgba(0, 0, 0, 0.14) 100%);
+	text-align: center;
 }
 
 .djo_cta_inner {
 	position: relative;
 	z-index: 1;
-	max-width: 760px;
+	max-width: 780px;
 	margin: 0 auto;
-	text-align: center;
+}
+
+.djo_cta_eyebrow {
+	color: rgba(255, 255, 255, 0.72);
 }
 
 .djo_cta_title {
 	margin: 0 0 16px;
-	color: var(--theme-color-title);
-	font-size: clamp(28px, 3.6vw, 46px);
-	line-height: 1.12;
+	color: #ffffff;
+	font-size: clamp(29px, 3.9vw, 50px);
+	line-height: 1.1;
 }
 
 .djo_cta_text {
 	margin: 0 auto 34px;
-	max-width: 60ch;
-	color: var(--theme-color-text);
-	font-size: clamp(15px, 1.2vw, 18px);
+	max-width: 56ch;
+	color: rgba(255, 255, 255, 0.82);
+	font-size: clamp(15px, 1.25vw, 18px);
 	line-height: 1.65;
 }
 
@@ -2148,19 +2193,53 @@ body.home .page_content_wrap {
 	align-items: center;
 	justify-content: center;
 	gap: 14px;
-	padding-top: 30px;
-	border-top: 1px solid var(--djo-rule);
 }
 
-/* The watermark again, this time drawn in ink so it can be seen on white. The
-   artwork is a white render, so it is inverted rather than being shipped a
-   second time in a second colour. */
+/* ---------- The assurance row ----------
+   The three things a visitor weighs in the second before booking: whether they
+   can be seen soon, what it will cost, and whether they will be sent somewhere
+   else afterwards. Set below the buttons rather than above them, because they
+   are there to answer the hesitation that arrives after the decision, not to
+   be read on the way to it. */
+.djo_cta_assurances {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 10px clamp(18px, 2.4vw, 34px);
+	list-style: none;
+	margin: clamp(26px, 3vw, 38px) 0 0;
+	padding: clamp(22px, 2.4vw, 30px) 0 0;
+	border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.djo_cta_assurances li {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	color: rgba(255, 255, 255, 0.86);
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+.djo_cta_tick {
+	display: inline-flex;
+	flex: 0 0 auto;
+	color: #ffffff;
+	opacity: 0.65;
+}
+
+.djo_cta_tick svg {
+	width: 17px;
+	height: 17px;
+}
+
+/* The watermark, drawn in white here because the ground is dark enough to
+   carry it as-is - no inversion needed, unlike on a light band. */
 .djo_spine_cta {
 	left: 50%;
-	width: 30%;
+	width: 34%;
 	transform: translateX(-50%);
-	filter: invert(1);
-	opacity: 0.05;
+	opacity: 0.06;
 }
 
 

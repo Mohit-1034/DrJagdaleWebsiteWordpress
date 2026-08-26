@@ -324,7 +324,7 @@ if ( ! function_exists( 'orto_child_render_group_page' ) ) {
 		);
 		?>
 
-		<section class="djo_page_hero djo_band djo_band_light">
+		<section class="djo_page_hero djo_band <?php echo esc_attr( orto_child_band_class( 'light' ) ); ?>">
 			<div class="content_wrap">
 			<?php
 			orto_child_section_head(
@@ -360,16 +360,21 @@ if ( ! function_exists( 'orto_child_render_group_page' ) ) {
 			</div>
 		</section>
 
-		<?php foreach ( $entries as $index => $entry ) { ?>
+		<?php foreach ( $entries as $entry ) { ?>
 			<?php
 			/*
 			 * Alternating full-width bands, light and dark, all the way down the
 			 * page. Eight identical white blocks read as one undifferentiated
 			 * wall; alternating grounds give the reader a place in the list
 			 * without a single rule being drawn.
+			 *
+			 * The value comes from orto_child_band_class() rather than from
+			 * $index % 2. Parity broke the moment an entry was taken out of the
+			 * list: the tail flipped, and the last entry ended up the same
+			 * value as the band after it. A counter cannot make that mistake.
 			 */
 			?>
-			<section class="djo_entry djo_band <?php echo ( $index % 2 ) ? 'djo_band_dark' : 'djo_band_light'; ?>" id="<?php echo esc_attr( $entry['slug'] ); ?>">
+			<section class="djo_entry djo_band <?php echo esc_attr( orto_child_band_class() ); ?>" id="<?php echo esc_attr( $entry['slug'] ); ?>">
 				<div class="content_wrap">
 				<div class="djo_entry_inner">
 

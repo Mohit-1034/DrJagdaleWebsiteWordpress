@@ -619,32 +619,68 @@ if ( ! function_exists( 'orto_child_cta_band' ) ) {
 			array(
 				'eyebrow' => __( 'Book a consultation', 'orto' ),
 				'title'   => __( 'Walk in with pain. Walk out with a plan.', 'orto' ),
-				'text'    => __( 'Same-day consultations, on-site digital X-ray and physiotherapy, and a treatment plan explained in plain language before anything begins.', 'orto' ),
+				'text'    => __( 'A consultation, an X-ray on site if you need one, and a treatment plan explained in plain language before anything begins.', 'orto' ),
+			)
+		);
+
+		/*
+		 * The three things a visitor weighs in the second before booking:
+		 * whether they can be seen soon, what it will cost, and whether they
+		 * will be sent somewhere else afterwards. Answering all three at the
+		 * point of decision removes more friction than any amount of
+		 * persuasion above it.
+		 */
+		$assurances = apply_filters(
+			'orto_child_cta_assurances',
+			array(
+				__( 'Open seven days, 11am to 8pm', 'orto' ),
+				sprintf( /* translators: %s: consultation fee. */ __( '%s consultation', 'orto' ), '&#8377;' . $business['consult_fee'] ),
+				__( 'Digital X-ray on site', 'orto' ),
 			)
 		);
 		?>
-		<section class="djo_cta djo_band djo_band_light">
+		<section class="djo_cta djo_band djo_band_accent">
 			<span class="djo_spine djo_spine_cta" aria-hidden="true"></span>
 
 			<div class="content_wrap">
 				<div class="djo_cta_inner">
-					<span class="djo_eyebrow"><?php echo esc_html( $args['eyebrow'] ); ?></span>
+					<span class="djo_eyebrow djo_cta_eyebrow"><?php echo esc_html( $args['eyebrow'] ); ?></span>
 					<h2 class="djo_cta_title"><?php echo esc_html( $args['title'] ); ?></h2>
 					<?php if ( '' !== $args['text'] ) { ?>
 						<p class="djo_cta_text"><?php echo esc_html( $args['text'] ); ?></p>
 					<?php } ?>
 
 					<div class="djo_cta_actions">
-						<a class="djo_button djo_button_solid" href="<?php echo esc_url( orto_child_page_url( 'contact-us' ) ); ?>">
+						<a class="djo_button djo_button_solid djo_button_lg" href="<?php echo esc_url( orto_child_page_url( 'contact-us' ) ); ?>">
 							<?php esc_html_e( 'Book an Appointment', 'orto' ); ?>
+							<?php echo orto_child_icon( 'arrow' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						</a>
 						<?php if ( ! empty( $business['phone'] ) ) { ?>
-							<a class="djo_button djo_button_outline" href="tel:<?php echo esc_attr( $business['phone_link'] ); ?>">
+							<?php
+							/*
+							 * The phone is a peer of the button, not a footnote.
+							 * A good share of the people reading this would
+								 * rather speak to somebody than fill in a form,
+							 * and burying that costs bookings.
+							 */
+							?>
+							<a class="djo_button djo_button_ghost djo_button_lg" href="tel:<?php echo esc_attr( $business['phone_link'] ); ?>">
 								<?php echo orto_child_icon( 'phone' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								<?php echo esc_html( $business['phone'] ); ?>
 							</a>
 						<?php } ?>
 					</div>
+
+					<?php if ( ! empty( $assurances ) ) { ?>
+						<ul class="djo_cta_assurances">
+							<?php foreach ( $assurances as $assurance ) { ?>
+								<li>
+									<span class="djo_cta_tick" aria-hidden="true"><?php echo orto_child_icon( 'check' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+									<?php echo wp_kses_post( $assurance ); ?>
+								</li>
+							<?php } ?>
+						</ul>
+					<?php } ?>
 				</div>
 			</div>
 		</section>

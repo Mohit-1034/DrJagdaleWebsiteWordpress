@@ -41,7 +41,7 @@ get_header();
 	 * a scrim rather than beside the text, because the header stripe floats
 	 * over this band and needs something dark to sit on.
 	 * ------------------------------------------------------------------- */ ?>
-	<section class="djo_hero djo_band djo_band_dark">
+	<section class="djo_hero djo_band <?php echo esc_attr( orto_child_band_class( 'dark' ) ); ?>">
 		<?php $djo_hero_image = orto_child_image_url( 'hero-xray-review' ); ?>
 		<?php if ( $djo_hero_image ) { ?>
 			<div class="djo_hero_media" aria-hidden="true">
@@ -157,7 +157,7 @@ get_header();
 	 * By the part of the body, because that is what a patient can name. The
 	 * clinical vocabulary comes later, on the Speciality page itself.
 	 * ------------------------------------------------------------------- */ ?>
-	<section class="djo_band djo_band_light djo_section_speciality">
+	<section class="djo_band <?php echo esc_attr( orto_child_band_class() ); ?> djo_section_speciality">
 		<div class="content_wrap">
 			<?php
 			orto_child_section_head(
@@ -197,7 +197,7 @@ get_header();
 	<?php /* ---------------------------------------------------------------
 	 * 4. About the surgeon
 	 * ------------------------------------------------------------------- */ ?>
-	<section class="djo_band djo_band_dark djo_about_band">
+	<section class="djo_band <?php echo esc_attr( orto_child_band_class() ); ?> djo_about_band">
 		<span class="djo_spine djo_spine_about" aria-hidden="true"></span>
 
 		<div class="content_wrap">
@@ -277,7 +277,7 @@ get_header();
 	 * per item, so the dots read as stops on one line instead of eight
 	 * unrelated ticks.
 	 * ------------------------------------------------------------------- */ ?>
-	<section class="djo_band djo_band_light djo_conditions">
+	<section class="djo_band <?php echo esc_attr( orto_child_band_class() ); ?> djo_conditions">
 		<div class="content_wrap">
 
 			<div class="djo_conditions_intro">
@@ -333,7 +333,7 @@ get_header();
 	<?php /* ---------------------------------------------------------------
 	 * 6. Services
 	 * ------------------------------------------------------------------- */ ?>
-	<section class="djo_band djo_band_dark djo_section_services">
+	<section class="djo_band <?php echo esc_attr( orto_child_band_class() ); ?> djo_section_services">
 		<div class="content_wrap">
 			<?php
 			orto_child_section_head(
@@ -375,7 +375,7 @@ get_header();
 	 * page that answered them with "book an appointment" would be doing the
 	 * reader harm to win a booking.
 	 * ------------------------------------------------------------------- */ ?>
-	<section class="djo_band djo_band_light djo_symptoms">
+	<section class="djo_band <?php echo esc_attr( orto_child_band_class() ); ?> djo_symptoms">
 		<div class="content_wrap">
 			<?php
 			orto_child_section_head(
@@ -435,7 +435,7 @@ get_header();
 	<?php /* ---------------------------------------------------------------
 	 * 8. Reviews
 	 * ------------------------------------------------------------------- */ ?>
-	<section class="djo_band djo_band_dark djo_reviews">
+	<section class="djo_band <?php echo esc_attr( orto_child_band_class() ); ?> djo_reviews">
 		<div class="content_wrap">
 			<?php
 			orto_child_section_head(

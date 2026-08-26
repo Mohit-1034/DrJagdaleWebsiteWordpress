@@ -85,7 +85,8 @@ while ( have_posts() ) {
 		<div class="post_content entry-content">
 
 			<?php /* ------------------------------------------------- Hero */ ?>
-			<section class="djo_page_hero">
+			<section class="djo_page_hero djo_band <?php echo esc_attr( orto_child_band_class( 'light' ) ); ?>">
+				<div class="content_wrap">
 				<?php
 				orto_child_section_head(
 					array(
@@ -96,10 +97,11 @@ while ( have_posts() ) {
 					)
 				);
 				?>
+				</div>
 			</section>
 
 			<?php /* ------------------------------------------ The surgeon */ ?>
-			<section class="djo_band djo_band_dark djo_about_band">
+			<section class="djo_band <?php echo esc_attr( orto_child_band_class() ); ?> djo_about_band">
 				<span class="djo_spine djo_spine_about" aria-hidden="true"></span>
 
 				<div class="content_wrap">
@@ -168,7 +170,7 @@ while ( have_posts() ) {
 			</section>
 
 			<?php /* ----------------------------------------- Education */ ?>
-			<section class="djo_band djo_band_light djo_education">
+			<section class="djo_band <?php echo esc_attr( orto_child_band_class() ); ?> djo_education">
 				<div class="content_wrap">
 				<?php
 				orto_child_section_head(
@@ -194,7 +196,7 @@ while ( have_posts() ) {
 			</section>
 
 			<?php /* -------------------------------------- What we stand for */ ?>
-			<section class="djo_band djo_band_dark djo_values">
+			<section class="djo_band <?php echo esc_attr( orto_child_band_class() ); ?> djo_values">
 				<div class="content_wrap">
 				<?php
 				orto_child_section_head(
@@ -218,7 +220,7 @@ while ( have_posts() ) {
 			</section>
 
 			<?php /* ------------------------------------------ The facilities */ ?>
-			<section class="djo_band djo_band_light djo_facilities">
+			<section class="djo_band <?php echo esc_attr( orto_child_band_class() ); ?> djo_facilities">
 				<div class="content_wrap">
 				<?php
 				orto_child_section_head(
