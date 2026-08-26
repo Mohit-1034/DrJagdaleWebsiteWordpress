@@ -1305,6 +1305,28 @@ body.home .page_content_wrap {
 
 .djo_hero_rating strong {
 	color: #ffffff;
+	font-size: 17px;
+	font-weight: 700;
+}
+
+/* The Google mark and the words beside it, lifted to the same weight as the
+   two numbers so the source of the rating reads as part of the claim rather
+   than as a footnote after it. */
+.djo_hero_rating_source {
+	display: inline-flex;
+	align-items: center;
+	/* Wider on the left than in the middle, so the mark groups with the words
+	   it belongs to rather than sticking to the review count before it. */
+	gap: 5px;
+	margin-left: 6px;
+	color: #ffffff;
+	font-weight: 600;
+}
+
+.djo_hero_rating_source svg {
+	width: 18px;
+	height: 18px;
+	flex: 0 0 auto;
 }
 
 /* ---------- The spine watermark ----------
@@ -1449,6 +1471,13 @@ body.home .page_content_wrap {
 	font-size: clamp(22px, 2.2vw, 30px);
 	font-weight: 700;
 	line-height: 1.1;
+}
+
+/* The opening hours run longer than the one- or two-word values beside them,
+   so they are set a step smaller and kept on one line. */
+.djo_trust_value_hours {
+	font-size: clamp(19px, 1.9vw, 26px);
+	white-space: nowrap;
 }
 
 .djo_trust_label {
@@ -2894,15 +2923,6 @@ body.page-template-template-about .page_content_wrap {
 
 .contact_page .contact_hours_item_closed .contact_hours_value {
 	color: var(--theme-color-meta);
-}
-
-.contact_page .contact_hours_fee {
-	margin: 18px 0 0;
-	padding-top: 16px;
-	border-top: 1px solid var(--theme-color-bd_color);
-	color: var(--theme-color-title);
-	font-size: 15px;
-	font-weight: 600;
 }
 
 /* ---------- Full-bleed map band ----------

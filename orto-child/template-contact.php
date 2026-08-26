@@ -129,17 +129,6 @@ while ( have_posts() ) {
 								</li>
 							<?php } ?>
 						</ul>
-						<?php if ( ! empty( $orto_child_contact_settings['consult_fee'] ) ) { ?>
-							<p class="contact_hours_fee">
-								<?php
-								printf(
-									/* translators: %s: consultation fee in rupees. */
-									esc_html__( 'Consultation fee: %s', 'orto' ),
-									'&#8377;' . esc_html( $orto_child_contact_settings['consult_fee'] )
-								);
-								?>
-							</p>
-						<?php } ?>
 					</div>
 
 					<div class="contact_social">
