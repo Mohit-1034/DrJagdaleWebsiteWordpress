@@ -1,0 +1,126 @@
+Version: 1.12.0
+	Skin 'default' is updated to the version 1.4.
+
+Version: 1.11.0
+    Added:
+        - TrxAddons: added reset of hidden items after the "item-by-item" animation inside sliders.
+        - TrxAddons: Woo Products Widget: added output of swatches from the trx-wcext plugin in product feeds and the Quick View popup.
+        - TrxAddons: added a recommendation to install the trx-wcext plugin for Orto-based themes when WooCommerce is active.
+        - TrxAddons: added item-by-item animation compatibility in trx-wcext support.
+        - TrxAddons: Elementor Templates: added an info button (i) for templates that depend on third-party plugins or require attention before loading. Such templates now also display a message when the "Insert" button is clicked.
+        - TrxAddons: added support for SportsPress affiliate functionality.
+        - TrxAddons: Layouts - Cart Widget: added an option to hide the zero counter.
+        - TrxAddons: fixed menu for touch devices: added submenu shift to the left via submenu_left.
+
+Version: 1.10.0
+    Added:
+        - TrxAddons: WooCommerce Product Filter Widget: added item filtering for large lists with more than 15 items and scrollable attribute lists in the sidebar.
+        - TrxAddons: added handlers for displaying library templates when creating 'woo-template' posts in ThemeREX WooCommerce Extension.
+        - TrxAddons: added support for "word-to-site-ai" WaaS service keys.
+        - Added compatibility with Elementor Pro product tabs.
+        - Added theme options update when importing ThemeREX WooCommerce Extension templates from the library.
+
+Version: 1.9.0
+    Added:
+        - Full compatibility with WordPress 7.0 and later.
+        - Full compatibility with the Elementor V4 builder.
+        - Support for Elementor V4 Atomic widgets.
+        - New "Atomic" demo built entirely with Atomic widgets.
+        - New set of 100% Atomic templates added to the ThemeREX Template Library.
+        - Full support for the Advanced WooCommerce plugin, including its advanced WooCommerce widgets.
+
+Version: 1.8.0
+    Added:
+        - Added Compare support for the "ThemeRex WooCommerce Extension" plugin.
+
+Version: 1.7.0
+	Skin 'default' is updated to the version 1.3.
+
+Version: 1.6.0
+    Fixed:
+        - Fixed a potential Object Injection vulnerability during unserialize of data from scheme_storage and skin options during skin installation/activation.
+        - Hotspot Widget: Fixed styles to prevent hotspots from overflowing small images (when the image width is smaller than the container).
+
+Version: 1.5.0
+   Added:
+        - Nav Menu Widget: added max-height setting for dropdowns - this enables scrolling inside the dropdown if its content exceeds the specified height.
+        - Slider Widget: added "slides_min_width" parameter to slider settings for adjusting the minimum width of slides - this determines the maximum number of simultaneously visible slides in responsive mode.
+        - TrxAddons: added voice input support to the TrxAiAssistant helper chat in the admin panel.
+        - Layouts Login Widget: added a parameter for configuring the list of items in the user menu.
+        - AI Helper: added a microphone button to all shortcode generators, allowing users to dictate prompts for content generation by voice.
+        - AI Helper: added SpeechToText functionality for converting voice to text and populating the associated text field.
+    Fixed:
+        - AI Helper: Audio Generator - fix in the upload field name 'upload_voice' when checking file type. The incorrect field name caused a potential vulnerability flagged by WP Scan.
+        - Nav Menu Widget: fix in the mobile menu panel close script to prevent scrolling to the top of the page when closing the menu.
+        - Nav Menu Widget: fixed a bug with duplicate IDs for the main menu and its mobile version.
+        - TrxAddons: fix in api/woocommerce to support non-Latin characters in WooCommerce product category and attribute names.
+        - TrxAddons: fix in the parallax animation script - a scaled object was jittering on the resize event.
+        - TrxAddons: Elementor Widgets: optimized database queries in "Posts" and "Woo Products" widgets, and fix for autocomplete terms - taxonomy was not taken into account when searching for terms.
+        - Fix in xxx_add_to_url() functions to support arrays in URL parameters.
+        - Minor CSS fixes (The Events Calendar).
+    Removed:
+        - Commented code and style fragments removed.
+
+Version: 1.4.0
+	Skin 'default' is updated to the version 1.2.
+
+Version: 1.3.0
+    Added:
+        - TrxAddons: Added version check and auto-update before running “Start Setup” in the theme installer. If a newer version is available on the server, it updates automatically (via ThemeREX Updater if not installed) to prevent issues with skin/addon/demo installation.
+        - Security: Introduced trx_addons_sanitize_slug function to sanitize skin/addon/template slugs and prevent potential LFI vulnerabilities in AJAX requests.
+        - WPML: Added <shortcodes> section in wpml-config.xml with translatable shortcode attributes in TRXAddons.
+        - Animations: Fixed Elementor’s transition: transform interference with scroll/mouse animations in TRXAddons.
+        - Color Picker: Added a “Clear” button to the lc_color_picker (multi-point gradient) in TRXAddons.
+        - Posts Widget: New options for Stripe layout — “Hide Content on Mobile” and “Image Over Content on Mobile.”
+        - Icon List Widget: Added styling and transition settings.
+        - NavMenu Widget: Added a :before element to preserve hover state when moving from menu item to dropdown.
+        - Marquee Widget: Removed “%” unit from Vertical Offset (non-functional).
+        - Hotspot Widget: Added sonar rounding and Icon Size option for type=image.
+        - Post Meta Widget: Added tag support for Custom Meta layout.
+        - Info Box Widget: Added an “Angle” option for the icon hover animation “Rotate.”
+        - Switcher Widget: Added Content Overflow control (visible/hidden).
+        - AI Helper: Added attachment support in assistants and new GPT-5 models to the default list.
+        - AI Helper: Updated OpenAI model references and corrected output tokens for GPT-4o.
+        - Elementor Templates: Added image-based filtering to the Blocks tab — select a layout screenshot to find visually similar templates. Includes Accuracy setting and relevance-based sorting.
+        - Demo Importer: Added ability to import pages from other skins under Partial Import tab.
+    Fixed:
+        - AI Helper: Renamed “Duration” parameter to “Complexity” in Music Generator widget (API change).
+        - Code Review (Envato): Consolidated multiple jQuery(document).ready() handlers in utils.js and theme-options.js.
+        - Updated compatibility with PHP 8.5 — the (boolean) type cast is no longer supported and has been replaced with (bool).
+        - Fixed a WP Customizer error that occurred when changing colors for controls with names like tribe_events[global_settings][title_color].
+        - Style tweaks for WooCommerce integrations.
+    Removed:
+        - TrxAddons: Removed forced inclusion of the AI Engine plugin from bundled themes.
+
+Version: 1.2.0
+    Added:
+        - TrxAddons: Hook for SportsPress to prevent redirecting to the “Welcome” screen after activation during demo import.
+        - Elementor Templates: "Insert", "Add to Favorites" buttons, and category name added in the Preview window.
+        - Backdrop Blur: New settings for sections, columns, containers, and all Elementor widgets; default semi-transparent background for sticky sections.
+        - HotSpot Widget: Major redesign for responsive positioning and styling; added tag selection, icon customizations, popup alignment, offsets, and more.
+        - Woo Products Widget: AJAX support for variable/grouped products; compatibility fixes for Tutor LMS.
+        - Logo Widget: Added styling options for text/slogan if no image logo is selected.
+        - Images Compare Widget: Separate styling for separator/handler; option to hide handler and control tag/offsets for "Before" & "After".
+        - Posts Widget: New “Stripe” skin – horizontal layout with image and two-column text.
+        - Theme Core Check: Added warning if theme core isn't updated before skin update (to avoid missing functions).
+    Fixed:
+        - TrxAddons: Tribe Events export now checks for new TEC tables (tec_events, tec_occurrences) if no events in wp_posts.
+        - Stack Sections: Fixed offsets, sticky section positioning on iOS, and animation issues with GSAP.
+        - Sticky Rows: Prevented content jump when "Hide fixed rows" is enabled.
+        - WooCommerce Product Categories (Elementor Pro): Selector weight increased to prevent theme styles from overriding grid layout.
+        - TrxAddons: Fixed issue where inserting an empty header/footer would insert full page content.
+        - Layouts Menu/Submenu: Improved mega menu alignment and renamed submenu option from “Static” to “Centered” for clarity.
+        - Unserialize Enhancements: Improved handling of serialized strings with optional object unpacking (disable_objects flag).
+        - AJAX Responses: Standardized response parsing and error handling across theme/plugin.
+        - Security: Fixed potential LFI vulnerability during pagination.
+        - Mobile Menu: Fixed auto-close when clicking tabs inside the menu.
+        - PHP 8 Compatibility: Fixed various warnings and errors with string/integer operations and child post queries.
+        - Header Fixes: Ensured mobile menu button displays correctly in default headers not using shortcodes.
+        - Customizer: Fixed reset behavior for Logo option.
+        - TGMPA: Support for install=false flag when registering Tutor plugin.
+        - Minor CSS fixes: (The Events Calendar).
+
+Version: 1.1.0
+	Skin 'default' is updated to the version 1.1.
+
+Release: v.1.0.0
