@@ -2,20 +2,21 @@
 /**
  * The page loader
  *
- * A white overlay shown on every navigation, carrying a single animated mark: a
- * joint flexing.
+ * A white overlay shown on every navigation, carrying a single animated mark:
+ * the clinic's own tree, drawing itself.
  *
  * THE IDEA
  *
- * Two bones and a pivot. The upper one holds still, the lower one swings
- * through a flexion arc and comes back, the way a knee or an elbow does. It is
- * the clinic's tagline made literal - Ensuring Painfree Mobility - and it is
- * the one thing an orthopaedic practice does that a circle spinning cannot say.
+ * The Andry tree - a crooked sapling lashed to a straight stake - is the symbol
+ * orthopaedics has used since 1741, and it is the mark already sitting inside
+ * the roundel in this site's header. It says what the practice does in one
+ * picture: something bent, held straight until it grows straight. The loader
+ * draws it on, part by part, and the ropes arrive last.
  *
- * Drawn entirely in CSS. No logo, no photograph, no SVG, no request: three
- * elements, a rotation and a pivot. That matters more than it sounds, because
- * this now runs on every page view and anything it has to fetch is a thing that
- * can arrive late and be seen arriving.
+ * Inline SVG and CSS, no request. Not images/logo-mark.png: this paints before
+ * anything else on the page, and an <img> here is a thing that can arrive after
+ * the loader it belongs to - the roundel is also a 512px scan whose ring of
+ * type is unreadable at this size. Same symbol, redrawn clean.
  *
  * WHY IT IS SHORT
  *
@@ -199,96 +200,125 @@ html.doc-jagadale-loader-locked body {
 	to { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 
-/* The joint ---------------------------------------------------------------
-   An upper bone that holds still, a pivot, and a lower bone that swings
-   through a flexion arc and comes back. Three elements and one rotation.
+/* The mark -----------------------------------------------------------------
+   The clinic's own emblem, drawn rather than fetched: the Andry tree - a
+   crooked sapling lashed to a straight stake - which is the oldest symbol
+   orthopaedics has and the thing already sitting inside the roundel in the
+   header. It says what the practice does in one picture: something bent, held
+   straight until it grows straight.
 
-   The proportions are the point: the shaft is slim, the ends are round, and
-   the pivot is wider than either shaft - which is roughly how a condyle sits
-   against a shaft, and is what stops the pair reading as two sticks.
+   Drawn as inline SVG and not as images/logo-mark.png on purpose. This paints
+   before anything else on the page, and an <img> here is a request that can
+   arrive after the loader it belongs to - the roundel is also a 512px scan
+   whose ring of type is unreadable at this size. Same symbol, redrawn clean.
 
-   The colours are literal rather than custom properties: this paints before
-   the theme's stylesheet has been parsed, so there is no --theme-color-* to
-   read yet. They are the skin's own sage, with the fixed bone and the pivot in
-   the deeper #4C6A44 the call-to-action band uses - the skin's sage alone is
-   about 2.5:1 on its warm white, which is fine for a link and thin for the only
-   mark on the screen. Keep them in step by hand if the skin ever changes. */
-.doc-jagadale-loader-joint {
-	position: relative;
-	width: 88px;
-	height: 114px;
+   It draws itself on: ground, stake, trunk, branches, crown, then the three
+   ropes, then it holds and starts again. Every stroked path carries
+   pathLength="100", which normalises each one to the same nominal length -
+   that is what lets one dash-offset animation drive paths of wildly different
+   real lengths without measuring any of them.
+
+   The colours are literal rather than custom properties: there is no
+   --theme-color-* to read yet at this point in the document. Sage #7BA16E and
+   the deeper #4C6A44 of the call-to-action band, with the rope in the logo's
+   own warm brown. Keep them in step by hand if the skin ever changes. */
+.doc-jagadale-loader-mark {
+	width: 96px;
+	height: 123px;
+	/* One cycle, shared by every part of the drawing. Declared here so the
+	   percentages in the keyframes below all mean the same thing. */
+	animation: doc-jagadale-loader-mark-cycle 3.4s linear infinite;
 }
 
-.doc-jagadale-loader-bone {
-	position: absolute;
-	left: 50%;
-	width: 12px;
-	height: 47px;
-	margin-left: -6px;
-	/* An ellipse rather than a pill: the long axis is barely curved and the
-	   ends are properly round, which is what makes it read as bone rather
-	   than as a rounded rectangle. */
-	border-radius: 6px / 10px;
-	background-color: #4C6A44;
+.doc-jagadale-loader-mark svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
 }
 
-/* The femur, above the joint, fixed. */
-.doc-jagadale-loader-bone-upper {
-	top: 5px;
+/* The whole mark fades out at the end of the cycle and back in at the start,
+   so the restart is a breath rather than a jump cut. */
+@keyframes doc-jagadale-loader-mark-cycle {
+	0%        { opacity: 0; }
+	5%, 88%   { opacity: 1; }
+	98%, 100% { opacity: 0; }
 }
 
-/* The tibia, below the joint, swinging. transform-origin sits at the top of
-   the bone - the pivot itself - so it rotates about the joint rather than
-   about its own middle. */
-.doc-jagadale-loader-bone-lower {
-	top: 62px;
-	background-color: #7BA16E;
-	transform-origin: 50% 5px;
-	animation: doc-jagadale-loader-flex 1.75s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+.doc-jagadale-loader-mark path {
+	fill: none;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	/* 100 because every path declares pathLength="100". Offset 100 is an
+	   undrawn path; the animations below run it to 0. */
+	stroke-dasharray: 100;
+	stroke-dashoffset: 100;
+	animation-duration: 3.4s;
+	animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+	animation-iteration-count: infinite;
 }
 
-/*
- * The flexion. Out to 38 degrees and back, with the pause built into the
- * keyframe rather than into a delay - a delay would restart the easing and the
- * swing would stutter at the top of every cycle.
- *
- * 38 is chosen, not arbitrary: enough that the movement is unmistakable at
- * 88px, and short of the angle where the lower bone crosses the tagline
- * beneath it.
- */
-@keyframes doc-jagadale-loader-flex {
-	0%, 8%    { transform: rotate(0deg); }
-	46%, 54%  { transform: rotate(34deg); }
-	92%, 100% { transform: rotate(0deg); }
+/* One keyframe set, reused. The stagger is done with negative delays rather
+   than with a keyframe each: every part draws over the same fraction of the
+   cycle, just starting at a different point in it. */
+@keyframes doc-jagadale-loader-draw {
+	0%       { stroke-dashoffset: 100; }
+	22%, 100% { stroke-dashoffset: 0; }
 }
 
-/* The joint itself. Sits over both bones, so the shafts disappear behind it
-   and the pair articulates rather than overlapping. */
-.doc-jagadale-loader-pivot {
-	position: absolute;
-	top: 47px;
-	left: 50%;
-	width: 23px;
-	height: 23px;
-	margin-left: -11.5px;
-	border-radius: 50%;
-	background-color: #4C6A44;
+.doc-jagadale-loader-ground {
+	stroke: rgba(76, 106, 68, 0.34);
+	stroke-width: 2.4;
+	animation-name: doc-jagadale-loader-draw;
 }
 
-/* A hairline ring around the joint, breathing very slightly in time with the
-   swing. The only flourish in the piece, and one is the right number. */
-.doc-jagadale-loader-pivot::after {
-	content: "";
-	position: absolute;
-	inset: -8px;
-	border: 1.5px solid rgba(123, 161, 110, 0.5);
-	border-radius: 50%;
-	animation: doc-jagadale-loader-pulse 1.75s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+.doc-jagadale-loader-stake {
+	stroke: #4C6A44;
+	stroke-width: 4.4;
+	animation-name: doc-jagadale-loader-draw;
+	animation-delay: -3.24s; /* starts at 5% of the cycle */
 }
 
-@keyframes doc-jagadale-loader-pulse {
-	0%, 100% { transform: scale(1);    opacity: 0.9; }
-	50%      { transform: scale(1.16); opacity: 0.4; }
+.doc-jagadale-loader-trunk {
+	stroke: #4C6A44;
+	stroke-width: 5.2;
+	animation-name: doc-jagadale-loader-draw;
+	animation-delay: -3.13s; /* 8% */
+}
+
+.doc-jagadale-loader-branch {
+	stroke: #4C6A44;
+	stroke-width: 2.8;
+	animation-name: doc-jagadale-loader-draw;
+	animation-delay: -2.79s; /* 18% */
+}
+
+/* The ropes, last and one after another - they are the point of the symbol,
+   so they arrive after there is something for them to bind. */
+.doc-jagadale-loader-rope {
+	stroke: #A9714B;
+	stroke-width: 2.6;
+	animation-name: doc-jagadale-loader-draw;
+}
+
+.doc-jagadale-loader-rope-1 { animation-delay: -2.31s; } /* 32% */
+.doc-jagadale-loader-rope-2 { animation-delay: -2.18s; } /* 36% */
+.doc-jagadale-loader-rope-3 { animation-delay: -2.04s; } /* 40% */
+
+/* The crown. A fill rather than a stroke, so it cannot be drawn on - it grows
+   in instead, from the top of the trunk, while the branches are still
+   arriving. */
+.doc-jagadale-loader-crown {
+	fill: #7BA16E;
+	transform-origin: 49px 26px;
+	opacity: 0;
+	animation: doc-jagadale-loader-grow 3.4s cubic-bezier(0.34, 1.3, 0.64, 1) infinite;
+	animation-delay: -2.92s; /* 14% */
+}
+
+@keyframes doc-jagadale-loader-grow {
+	0%        { opacity: 0; transform: scale(0.4); }
+	18%, 100% { opacity: 1; transform: scale(1); }
 }
 
 /* The tagline -------------------------------------------------------------
@@ -367,7 +397,7 @@ html.doc-jagadale-loader-locked body {
 
 /* Short viewports - a phone in landscape has no room for the full stack. */
 @media (max-height: 480px) {
-	.doc-jagadale-loader-joint { transform: scale(0.78); }
+	.doc-jagadale-loader-mark { transform: scale(0.74); }
 	.doc-jagadale-loader-tagline { margin-top: 14px; letter-spacing: 0.14em; }
 	.doc-jagadale-loader-track { margin-top: 12px; }
 }
@@ -383,12 +413,19 @@ html.doc-jagadale-loader-locked body {
 		transform: none;
 		animation: none;
 	}
-	.doc-jagadale-loader-bone-lower,
-	.doc-jagadale-loader-pivot::after {
+	/* The mark stops drawing itself and is simply there, fully drawn. Nothing
+	   is lost: the symbol is the information, the drawing-on was the flourish. */
+	.doc-jagadale-loader-mark,
+	.doc-jagadale-loader-mark path,
+	.doc-jagadale-loader-crown {
 		animation: none;
+		opacity: 1;
 	}
-	.doc-jagadale-loader-bone-lower {
-		transform: rotate(16deg);
+	.doc-jagadale-loader-mark path {
+		stroke-dashoffset: 0;
+	}
+	.doc-jagadale-loader-crown {
+		transform: none;
 	}
 	.doc-jagadale-loader-waiting .doc-jagadale-loader-bar {
 		animation: none;
@@ -435,10 +472,21 @@ if ( ! function_exists( 'orto_child_loader_markup' ) ) {
 	<span class="screen-reader-text"><?php esc_html_e( 'Loading', 'orto' ); ?></span>
 
 	<div class="doc-jagadale-loader-stage">
-		<div class="doc-jagadale-loader-joint" aria-hidden="true">
-			<span class="doc-jagadale-loader-bone doc-jagadale-loader-bone-upper"></span>
-			<span class="doc-jagadale-loader-bone doc-jagadale-loader-bone-lower"></span>
-			<span class="doc-jagadale-loader-pivot"></span>
+		<div class="doc-jagadale-loader-mark" aria-hidden="true">
+			<svg viewBox="0 0 100 128" focusable="false">
+				<path class="doc-jagadale-loader-ground" pathLength="100" d="M22 113h56"/>
+				<path class="doc-jagadale-loader-stake" pathLength="100" d="M63 43v68"/>
+				<path class="doc-jagadale-loader-trunk" pathLength="100" d="M46 111c0-12-8-20-4-32s14-20 10-32"/>
+				<path class="doc-jagadale-loader-branch" pathLength="100" d="M51 52 41 42m10 4 10-10"/>
+				<g class="doc-jagadale-loader-crown">
+					<ellipse cx="36" cy="31" rx="17" ry="12.5"/>
+					<ellipse cx="62" cy="28" rx="18" ry="13"/>
+					<ellipse cx="49" cy="18" rx="16" ry="12"/>
+				</g>
+				<path class="doc-jagadale-loader-rope doc-jagadale-loader-rope-1" pathLength="100" d="M39 78c8-4 18-1 27-6"/>
+				<path class="doc-jagadale-loader-rope doc-jagadale-loader-rope-2" pathLength="100" d="M40 90c8-4 18-1 27-6"/>
+				<path class="doc-jagadale-loader-rope doc-jagadale-loader-rope-3" pathLength="100" d="M42 102c8-4 17-1 26-6"/>
+			</svg>
 		</div>
 
 		<?php if ( ! empty( $config['show_tagline'] ) ) { ?>
@@ -463,6 +511,14 @@ if ( ! function_exists( 'orto_child_loader_markup' ) ) {
 	var el = document.getElementById('doc-jagadale-loader');
 
 	if (!el) { return; }
+
+	/*
+	 * The stage's markup, kept as a string before the overlay is removed. The
+	 * outgoing-navigation overlay further down is built from this rather than
+	 * from a second hand-written copy - one drawing, one place to change it.
+	 */
+	var stageEl = el.querySelector('.doc-jagadale-loader-stage');
+	var stage = stageEl ? stageEl.innerHTML : '';
 
 	var MIN = <?php echo (int) $config['min_duration']; ?>;
 	var COVER_EXIT = <?php echo ! empty( $config['cover_exit'] ) ? 'true' : 'false'; ?>;
@@ -590,15 +646,8 @@ if ( ! function_exists( 'orto_child_loader_markup' ) ) {
 		var out = document.createElement('div');
 		out.className = 'doc-jagadale-loader';
 		out.setAttribute('aria-hidden', 'true');
-		out.innerHTML = '<div class="doc-jagadale-loader-stage">' +
-			'<div class="doc-jagadale-loader-joint">' +
-			'<span class="doc-jagadale-loader-bone doc-jagadale-loader-bone-upper"></span>' +
-			'<span class="doc-jagadale-loader-bone doc-jagadale-loader-bone-lower"></span>' +
-			'<span class="doc-jagadale-loader-pivot"></span>' +
-			'</div>' +
-			<?php echo ! empty( $config['show_tagline'] ) ? "'<p class=\"doc-jagadale-loader-tagline\">" . esc_js( $business['tagline'] ) . "</p>' +" : ''; ?>
-			'<div class="doc-jagadale-loader-track">' +
-			'<span class="doc-jagadale-loader-bar"></span></div></div>';
+		out.innerHTML = '<div class="doc-jagadale-loader-stage">' + stage +
+			'</div>';
 
 		// Straight to the indeterminate shuttle: there is nothing to measure
 		// on the way out, and a bar creeping to a number we invented would be
