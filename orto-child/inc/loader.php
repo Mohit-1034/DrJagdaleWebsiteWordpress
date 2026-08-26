@@ -23,7 +23,7 @@
  * The previous build showed once per session and held for 1.7s, which is a
  * reasonable length for a greeting. Shown on every navigation, 1.7s is not a
  * greeting, it is a toll gate on the menu - seven clicks around the site and a
- * visitor has spent twelve seconds watching a bone swing. The hold is 600ms
+ * visitor has spent twelve seconds watching a tree grow. The hold is 600ms
  * now, and the whole reveal is over in 360ms, so the loader is a beat between
  * pages rather than an event.
  *
@@ -212,8 +212,10 @@ html.doc-jagadale-loader-locked body {
    arrive after the loader it belongs to - the roundel is also a 512px scan
    whose ring of type is unreadable at this size. Same symbol, redrawn clean.
 
-   It draws itself on: ground, stake, trunk, branches, crown, then the three
-   ropes, then it holds and starts again. Every stroked path carries
+   It draws itself on: ground, then stake and trunk together, then the crown,
+   then the three ropes, then it holds and starts again. Stake and trunk are
+   both written from the ground upwards - a path draws from its own start, and
+   one of the two growing downwards out of the sky is immediately wrong. Every stroked path carries
    pathLength="100", which normalises each one to the same nominal length -
    that is what lets one dash-offset animation drive paths of wildly different
    real lengths without measuring any of them.
@@ -258,9 +260,12 @@ html.doc-jagadale-loader-locked body {
 	animation-iteration-count: infinite;
 }
 
-/* One keyframe set, reused. The stagger is done with negative delays rather
-   than with a keyframe each: every part draws over the same fraction of the
-   cycle, just starting at a different point in it. */
+/* One keyframe set, reused. The stagger is done with delays rather than with a
+   keyframe each: every part draws over the same 22% of the cycle, just starting
+   at a different point in it. The delays are positive on purpose - a negative
+   delay would seek each part forward into its own timeline, so the whole tree
+   would be standing there fully drawn on the very first frame and would then
+   un-draw itself, which is the opposite of what this is for. */
 @keyframes doc-jagadale-loader-draw {
 	0%       { stroke-dashoffset: 100; }
 	22%, 100% { stroke-dashoffset: 0; }
@@ -276,21 +281,21 @@ html.doc-jagadale-loader-locked body {
 	stroke: #4C6A44;
 	stroke-width: 4.4;
 	animation-name: doc-jagadale-loader-draw;
-	animation-delay: -3.24s; /* starts at 5% of the cycle */
+	animation-delay: 0.17s; /* 5% of the cycle */
 }
 
 .doc-jagadale-loader-trunk {
 	stroke: #4C6A44;
 	stroke-width: 5.2;
 	animation-name: doc-jagadale-loader-draw;
-	animation-delay: -3.13s; /* 8% */
+	animation-delay: 0.28s; /* 8% */
 }
 
 .doc-jagadale-loader-branch {
 	stroke: #4C6A44;
 	stroke-width: 2.8;
 	animation-name: doc-jagadale-loader-draw;
-	animation-delay: -2.79s; /* 18% */
+	animation-delay: 0.75s; /* 22% */
 }
 
 /* The ropes, last and one after another - they are the point of the symbol,
@@ -301,19 +306,19 @@ html.doc-jagadale-loader-locked body {
 	animation-name: doc-jagadale-loader-draw;
 }
 
-.doc-jagadale-loader-rope-1 { animation-delay: -2.31s; } /* 32% */
-.doc-jagadale-loader-rope-2 { animation-delay: -2.18s; } /* 36% */
-.doc-jagadale-loader-rope-3 { animation-delay: -2.04s; } /* 40% */
+.doc-jagadale-loader-rope-1 { animation-delay: 1.22s; } /* 36% */
+.doc-jagadale-loader-rope-2 { animation-delay: 1.36s; } /* 40% */
+.doc-jagadale-loader-rope-3 { animation-delay: 1.50s; } /* 44% */
 
 /* The crown. A fill rather than a stroke, so it cannot be drawn on - it grows
    in instead, from the top of the trunk, while the branches are still
    arriving. */
 .doc-jagadale-loader-crown {
 	fill: #7BA16E;
-	transform-origin: 49px 26px;
+	transform-origin: 49px 32px;
 	opacity: 0;
 	animation: doc-jagadale-loader-grow 3.4s cubic-bezier(0.34, 1.3, 0.64, 1) infinite;
-	animation-delay: -2.92s; /* 14% */
+	animation-delay: 0.82s; /* 24% */
 }
 
 @keyframes doc-jagadale-loader-grow {
@@ -324,7 +329,7 @@ html.doc-jagadale-loader-locked body {
 /* The tagline -------------------------------------------------------------
    The clinic's own words. The only thing identifying whose site this is now
    that the mark has gone, so it stays - but quiet, and smaller than the
-   joint above it. */
+   tree above it. */
 .doc-jagadale-loader-tagline {
 	margin: 30px 0 0;
 	color: #7E847B;
@@ -403,10 +408,10 @@ html.doc-jagadale-loader-locked body {
 }
 
 /* Reduced motion ----------------------------------------------------------
-   The swing stops and the joint rests at its neutral angle; the ring stops
-   breathing; the shuttle goes entirely, because an indeterminate bar is pure
-   motion with no information in it. What is left is a static diagram and the
-   words, which is what the loader is actually for. */
+   The tree stops drawing itself and is simply there, whole; the shuttle goes
+   entirely, because an indeterminate bar is pure motion with no information in
+   it. What is left is the mark and the words, which is what the loader is
+   actually for. */
 @media (prefers-reduced-motion: reduce) {
 	.doc-jagadale-loader-stage {
 		opacity: 1;
@@ -464,9 +469,9 @@ if ( ! function_exists( 'orto_child_loader_markup' ) ) {
 <div class="doc-jagadale-loader" id="doc-jagadale-loader" role="status" aria-live="polite">
 	<?php
 	/*
-	 * The only thing announced is that the page is loading. The joint below is
+	 * The only thing announced is that the page is loading. The tree below is
 	 * a decoration and is hidden from the accessibility tree: a screen reader
-	 * user gains nothing from being told about a swinging bone.
+	 * user gains nothing from being told about a drawing of a sapling.
 	 */
 	?>
 	<span class="screen-reader-text"><?php esc_html_e( 'Loading', 'orto' ); ?></span>
@@ -475,13 +480,13 @@ if ( ! function_exists( 'orto_child_loader_markup' ) ) {
 		<div class="doc-jagadale-loader-mark" aria-hidden="true">
 			<svg viewBox="0 0 100 128" focusable="false">
 				<path class="doc-jagadale-loader-ground" pathLength="100" d="M22 113h56"/>
-				<path class="doc-jagadale-loader-stake" pathLength="100" d="M63 43v68"/>
-				<path class="doc-jagadale-loader-trunk" pathLength="100" d="M46 111c0-12-8-20-4-32s14-20 10-32"/>
-				<path class="doc-jagadale-loader-branch" pathLength="100" d="M51 52 41 42m10 4 10-10"/>
+				<path class="doc-jagadale-loader-stake" pathLength="100" d="M63 111V45"/>
+				<path class="doc-jagadale-loader-trunk" pathLength="100" d="M46 111c2-14-12-22-6-34 6-12 18-18 13-32"/>
+				<path class="doc-jagadale-loader-branch" pathLength="100" d="M52 54 43 45m9 4 10-10"/>
 				<g class="doc-jagadale-loader-crown">
-					<ellipse cx="36" cy="31" rx="17" ry="12.5"/>
-					<ellipse cx="62" cy="28" rx="18" ry="13"/>
-					<ellipse cx="49" cy="18" rx="16" ry="12"/>
+					<ellipse cx="33" cy="32" rx="19" ry="14"/>
+					<ellipse cx="66" cy="30" rx="19" ry="14"/>
+					<ellipse cx="49" cy="20" rx="20" ry="15"/>
 				</g>
 				<path class="doc-jagadale-loader-rope doc-jagadale-loader-rope-1" pathLength="100" d="M39 78c8-4 18-1 27-6"/>
 				<path class="doc-jagadale-loader-rope doc-jagadale-loader-rope-2" pathLength="100" d="M40 90c8-4 18-1 27-6"/>
