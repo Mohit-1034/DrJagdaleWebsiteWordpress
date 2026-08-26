@@ -1,0 +1,221 @@
+name: Deploy Orto Theme
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Prevent overlapping deploys from racing on the remote (rsync + cache purge).
+concurrency:
+  group: deploy-hostinger-${{ github.ref }}
+  cancel-in-progress: false
+
+# This repo keeps the theme dirs at the repo root. We deploy both the
+# Orto parent and its child theme into the remote wp-content/themes/.
+env:
+  THEME_SRC_BASE: "."
+  THEME_SLUGS: "orto orto-child"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Bump theme version (cache bust CSS/JS)
+        env:
+          THEME_SRC_BASE: ${{ env.THEME_SRC_BASE }}
+          THEME_SLUGS: ${{ env.THEME_SLUGS }}
+        run: |
+          bash .github/scripts/bump-theme-version.sh "${GITHUB_RUN_NUMBER}-${GITHUB_SHA:0:7}"
+
+      # -------------------------------
+      # Validate Hostinger secrets
+      # -------------------------------
+      - name: Validate deploy secrets
+        env:
+          SSH_HOST: ${{ secrets.HOSTINGER_SSH_HOST }}
+          SSH_USER: ${{ secrets.HOSTINGER_SSH_USER }}
+          REMOTE_THEMES_PATH: ${{ secrets.HOSTINGER_REMOTE_THEMES_PATH }}
+          SSH_PRIVATE_KEY: ${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}
+          SSH_PORT: ${{ secrets.HOSTINGER_SSH_PORT }}
+        run: |
+          set -euo pipefail
+
+          missing=""
+          [ -z "${SSH_HOST// }" ] && missing="${missing} HOSTINGER_SSH_HOST"
+          [ -z "${SSH_USER// }" ] && missing="${missing} HOSTINGER_SSH_USER"
+          [ -z "${REMOTE_THEMES_PATH// }" ] && missing="${missing} HOSTINGER_REMOTE_THEMES_PATH"
+          [ -z "${SSH_PRIVATE_KEY// }" ] && missing="${missing} HOSTINGER_SSH_PRIVATE_KEY"
+
+          if [ -n "$missing" ]; then
+            echo "::error::Missing GitHub Secrets:$missing"
+            exit 1
+          fi
+
+          if ! printf '%s' "${SSH_PRIVATE_KEY}" | grep -qE 'BEGIN (OPENSSH |RSA |EC )?PRIVATE KEY'; then
+            echo "::error::HOSTINGER_SSH_PRIVATE_KEY must be an OpenSSH private key (starts with -----BEGIN ... PRIVATE KEY-----)."
+            echo "Hint: copy the private key in OpenSSH format, not PuTTY .ppk."
+            exit 1
+          fi
+
+          # Normalize: secrets may include trailing newlines/spaces.
+          REMOTE_CLEAN="$(printf '%s' "${REMOTE_THEMES_PATH}" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+          REMOTE_CLEAN="${REMOTE_CLEAN/#~ \//~/}"
+          REMOTE_CLEAN="${REMOTE_CLEAN%/}"   # strip any trailing slash
+
+          if [[ "${REMOTE_CLEAN}" != /* && "${REMOTE_CLEAN}" != \~/* ]]; then
+            echo "::error::HOSTINGER_REMOTE_THEMES_PATH must be absolute (/...) or home-relative (~/*)."
+            echo "Example: ~/domains/yourdomain.com/public_html/wp-content/themes"
+            exit 1
+          fi
+
+          if [[ "${REMOTE_CLEAN}" != *"/wp-content/themes" ]]; then
+            echo "::error::HOSTINGER_REMOTE_THEMES_PATH must end with /wp-content/themes"
+            echo "Example: ~/domains/yourdomain.com/public_html/wp-content/themes"
+            exit 1
+          fi
+          echo "REMOTE_THEMES_PATH_CLEAN=${REMOTE_CLEAN}" >> "$GITHUB_ENV"
+
+          PORT="${SSH_PORT:-65002}"
+          [ -z "${PORT// }" ] && PORT=65002
+          echo "SSH_PORT=${PORT}" >> "$GITHUB_ENV"
+
+          # Strip any user@/:port from the host secret.
+          SSH_HOST_CLEAN=$(echo "${SSH_HOST}" | sed -E 's/^[^@]+@//' | sed -E 's/:[0-9]+$//')
+          echo "SSH_HOST_CLEAN=${SSH_HOST_CLEAN}" >> "$GITHUB_ENV"
+
+          echo "All Hostinger secrets are configured (port ${PORT})."
+
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}
+
+      - name: Trust Hostinger host key
+        env:
+          SSH_HOST: ${{ env.SSH_HOST_CLEAN }}
+          SSH_PORT: ${{ env.SSH_PORT }}
+          SSH_KNOWN_HOSTS: ${{ secrets.HOSTINGER_SSH_KNOWN_HOSTS }}
+        run: bash .github/scripts/trust-ssh-host.sh
+
+      - name: Prepare remote theme directories
+        env:
+          SSH_USER: ${{ secrets.HOSTINGER_SSH_USER }}
+          REMOTE_THEMES_PATH: ${{ env.REMOTE_THEMES_PATH_CLEAN }}
+          THEME_SLUGS: ${{ env.THEME_SLUGS }}
+        run: |
+          set -euo pipefail
+          ssh ${SSH_OPTS} "${SSH_USER}@${SSH_HOST_CLEAN}" bash -s -- "${REMOTE_THEMES_PATH}" "${THEME_SLUGS}" <<'REMOTE'
+          set -euo pipefail
+          RAW_BASE="$1"; SLUGS="$2"
+          if [[ "${RAW_BASE}" == "~/"* ]]; then
+            BASE="${HOME}/${RAW_BASE#~/}"
+          else
+            BASE="${RAW_BASE}"
+          fi
+          if [[ "${BASE}" == /home/* && "${BASE}" != "${HOME}/"* ]]; then
+            echo "::error::HOSTINGER_REMOTE_THEMES_PATH points to a different user's home."
+            echo "SSH user: $(whoami) | SSH home: ${HOME} | path: ${RAW_BASE}"
+            exit 1
+          fi
+          for slug in ${SLUGS}; do
+            mkdir -p -- "${BASE}/${slug}"
+            test -d "${BASE}/${slug}"
+          done
+          echo "Remote theme directories are ready under ${BASE}."
+          REMOTE
+
+      - name: Deploy theme files
+        env:
+          SSH_USER: ${{ secrets.HOSTINGER_SSH_USER }}
+          REMOTE_THEMES_PATH: ${{ env.REMOTE_THEMES_PATH_CLEAN }}
+          THEME_SRC_BASE: ${{ env.THEME_SRC_BASE }}
+          THEME_SLUGS: ${{ env.THEME_SLUGS }}
+        run: |
+          set -euo pipefail
+          export RSYNC_RSH="ssh ${SSH_OPTS}"
+
+          for slug in ${THEME_SLUGS}; do
+            if [ ! -d "./${THEME_SRC_BASE}/${slug}" ]; then
+              echo "::warning::Local theme ./${THEME_SRC_BASE}/${slug} not found — skipping."
+              continue
+            fi
+            echo "Deploying ${slug} ..."
+            rsync -avz --delete \
+              --exclude=".git" \
+              --exclude=".github" \
+              --exclude=".gitignore" \
+              --exclude=".gitattributes" \
+              --exclude="node_modules" \
+              --exclude="vendor" \
+              --exclude=".DS_Store" \
+              --exclude="**/.DS_Store" \
+              "./${THEME_SRC_BASE}/${slug}/" \
+              "${SSH_USER}@${SSH_HOST_CLEAN}:${REMOTE_THEMES_PATH}/${slug}/"
+          done
+          echo "Hostinger theme deployment completed."
+
+      - name: Purge WordPress and Hostinger cache
+        env:
+          SSH_USER: ${{ secrets.HOSTINGER_SSH_USER }}
+          REMOTE_THEMES_PATH: ${{ env.REMOTE_THEMES_PATH_CLEAN }}
+          WP_ROOT: ${{ secrets.HOSTINGER_WP_ROOT }}
+        run: |
+          set -euo pipefail
+
+          WP_ROOT_CLEAN=""
+          if [ -n "${WP_ROOT// }" ]; then
+            WP_ROOT_CLEAN="$(printf '%s' "${WP_ROOT}" | tr -d '\r\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+            WP_ROOT_CLEAN="${WP_ROOT_CLEAN/#~ \//~/}"
+          fi
+
+          # Derive WP root from the themes path (.../wp-content/themes -> ...).
+          WP_DIR_FROM_THEMES="${REMOTE_THEMES_PATH%/wp-content/themes}"
+
+          if [ -n "${WP_DIR_FROM_THEMES}" ] && [ "${WP_DIR_FROM_THEMES}" != "${REMOTE_THEMES_PATH}" ]; then
+            WP_DIR="${WP_DIR_FROM_THEMES}"
+          elif [ -n "${WP_ROOT_CLEAN}" ]; then
+            WP_DIR="${WP_ROOT_CLEAN}"
+          else
+            echo "::error::Could not derive WP root; set HOSTINGER_WP_ROOT."
+            exit 1
+          fi
+
+          echo "Purging caches (WP root: ${WP_DIR}) ..."
+          ssh ${SSH_OPTS} "${SSH_USER}@${SSH_HOST_CLEAN}" "bash -s" -- "${WP_DIR}" \
+            < .github/scripts/remote-purge-cache.sh
+
+      - name: Verify deployment
+        env:
+          SSH_USER: ${{ secrets.HOSTINGER_SSH_USER }}
+          REMOTE_THEMES_PATH: ${{ env.REMOTE_THEMES_PATH_CLEAN }}
+          THEME_SLUGS: ${{ env.THEME_SLUGS }}
+        run: |
+          set -euo pipefail
+          ssh ${SSH_OPTS} "${SSH_USER}@${SSH_HOST_CLEAN}" bash -s -- "${REMOTE_THEMES_PATH}" "${THEME_SLUGS}" <<'REMOTE'
+          set -euo pipefail
+          RAW_BASE="$1"; SLUGS="$2"
+          if [[ "${RAW_BASE}" == "~/"* ]]; then
+            BASE="${HOME}/${RAW_BASE#~/}"
+          else
+            BASE="${RAW_BASE}"
+          fi
+          for slug in ${SLUGS}; do
+            DIR="${BASE}/${slug}"
+            echo "── ${slug} (${DIR})"
+            if [ ! -f "${DIR}/style.css" ]; then
+              echo "::error::style.css missing for ${slug} after deploy"
+              exit 1
+            fi
+            echo "style.css size: $(wc -c < "${DIR}/style.css") bytes"
+          done
+          if command -v wp >/dev/null 2>&1; then
+            WP_ROOT="${BASE%/wp-content/themes}"
+            echo "Active WordPress theme: $(wp --path="${WP_ROOT}" theme list --status=active --field=name 2>/dev/null || echo 'unknown')"
+          fi
+          echo "Hostinger deployment verified."
+          REMOTE
