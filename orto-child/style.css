@@ -1315,7 +1315,10 @@ body.home .page_content_wrap {
 .djo_hero_rating_source {
 	display: inline-flex;
 	align-items: center;
-	gap: 7px;
+	/* Wider on the left than in the middle, so the mark groups with the words
+	   it belongs to rather than sticking to the review count before it. */
+	gap: 5px;
+	margin-left: 6px;
 	color: #ffffff;
 	font-weight: 600;
 }
