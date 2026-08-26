@@ -3914,11 +3914,21 @@ body.page-template-template-about .page_content_wrap {
 	transition: opacity var(--djo-fast) var(--djo-ease);
 }
 
+/* Sized by height so the lockup keeps its proportions whatever file is in
+   place. 22px puts the wordmark on about the same optical weight as the
+   copyright line it sits under - a credit that out-shouts the client's own
+   small print is a credit in the wrong place. */
 .footer_jagadale .djo_footer_credit_link img {
 	display: block;
 	width: auto;
-	height: 20px;
-	transition: transform var(--djo-base) var(--djo-spring);
+	height: 22px;
+	opacity: 0.85;
+	transition: opacity var(--djo-fast) var(--djo-ease), transform var(--djo-base) var(--djo-spring);
+}
+
+.footer_jagadale .djo_footer_credit_link:hover img,
+.footer_jagadale .djo_footer_credit_link:focus-visible img {
+	opacity: 1;
 }
 
 .footer_jagadale .djo_footer_credit_name {
@@ -3928,9 +3938,12 @@ body.page-template-template-about .page_content_wrap {
 	letter-spacing: 0.01em;
 }
 
+/* No rotation here. That was written when this was a square mark on its own;
+   applied to a lockup it tips the wordmark off its baseline and reads as a
+   mistake. A lift is enough. */
 .footer_jagadale .djo_footer_credit_link:hover img,
 .footer_jagadale .djo_footer_credit_link:focus-visible img {
-	transform: rotate(-10deg) scale(1.1);
+	transform: translateY(-2px);
 }
 
 /* ---------- Bottom bar ---------- */

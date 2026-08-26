@@ -187,6 +187,9 @@ if ( '' === $orto_child_footer_logo_url ) {
 				 * that file is bundled, and falls back to a text wordmark when it
 				 * is not - so the credit is never missing and the mark is never
 				 * hotlinked from blocsys.com.
+				 *
+				 * The bundled file is the white lockup, which is drawn for a dark
+				 * ground and is why it is only ever used in this footer.
 				 */
 				$orto_child_footer_credit_url = '';
 
@@ -201,9 +204,19 @@ if ( '' === $orto_child_footer_logo_url ) {
 					<span class="djo_footer_credit_label"><?php esc_html_e( 'Built by', 'orto' ); ?></span>
 					<a class="djo_footer_credit_link" href="https://blocsys.com/" target="_blank" rel="noopener">
 						<?php if ( $orto_child_footer_credit_url ) { ?>
-							<img src="<?php echo esc_url( $orto_child_footer_credit_url ); ?>" alt="Blocsys" width="64" height="64" loading="lazy" decoding="async">
+							<?php
+							/*
+							 * The supplied logo is the full lockup - mark and
+							 * wordmark together - so the text beside it would be
+							 * the word "Blocsys" printed twice. The wordmark
+							 * carries the name, and the alt attribute carries it
+							 * for anyone who cannot see the wordmark.
+							 */
+							?>
+							<img src="<?php echo esc_url( $orto_child_footer_credit_url ); ?>" alt="Blocsys" width="270" height="60" loading="lazy" decoding="async">
+						<?php } else { ?>
+							<span class="djo_footer_credit_name">Blocsys</span>
 						<?php } ?>
-						<span class="djo_footer_credit_name">Blocsys</span>
 					</a>
 				</p>
 			</div>
