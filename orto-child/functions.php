@@ -108,7 +108,7 @@ if ( ! function_exists( 'orto_child_get_business' ) ) {
 				'address'        => 'Shop No. S-66, Second Floor, Destination Center 1, Near P.M.S. Office, Nanded City, Sinhgad Road, Pune, Maharashtra 411068',
 				'address_short'  => 'Nanded City, Sinhgad Road, Pune',
 
-				'facebook_url'   => 'https://www.facebook.com/drjagadalesorthocare',
+				'facebook_url'   => 'https://www.facebook.com/p/Dr-Jagadales-Orthocare-Fracture-Clinic-And-Digital-Xray-100064227964234/',
 				'instagram_url'  => 'https://www.instagram.com/dr_jagdale_nanded_city/',
 
 				// Consulting hours, from the Google Business Profile.
@@ -117,7 +117,6 @@ if ( ! function_exists( 'orto_child_get_business' ) ) {
 					array( 'label' => 'Sunday', 'value' => '11:00 AM - 8:00 PM' ),
 				),
 
-				'consult_fee'    => '300',
 				'rating'         => '4.8',
 				'rating_count'   => '165',
 				'experience'     => '11',
@@ -638,17 +637,15 @@ if ( ! function_exists( 'orto_child_cta_band' ) ) {
 		);
 
 		/*
-		 * The three things a visitor weighs in the second before booking:
-		 * whether they can be seen soon, what it will cost, and whether they
-		 * will be sent somewhere else afterwards. Answering all three at the
-		 * point of decision removes more friction than any amount of
-		 * persuasion above it.
+		 * The two things a visitor weighs in the second before booking:
+		 * whether they can be seen soon and whether they will be sent
+		 * somewhere else afterwards. Answering both at the point of decision
+		 * removes more friction than any amount of persuasion above it.
 		 */
 		$assurances = apply_filters(
 			'orto_child_cta_assurances',
 			array(
 				__( 'Open seven days, 11am to 8pm', 'orto' ),
-				sprintf( /* translators: %s: consultation fee. */ __( '%s consultation', 'orto' ), '&#8377;' . $business['consult_fee'] ),
 				__( 'Digital X-ray on site', 'orto' ),
 			)
 		);

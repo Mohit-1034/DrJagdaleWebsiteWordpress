@@ -58,7 +58,7 @@ $djo_values = array(
 	array(
 		'icon'  => 'badge',
 		'title' => __( 'Plain language, every time', 'orto' ),
-		'text'  => __( 'You leave knowing what is wrong, what the plan is, how long it should take and what it will cost. If a word needs explaining, it gets explained.', 'orto' ),
+		'text'  => __( 'You leave knowing what is wrong, what the plan is and how long it should take. If a word needs explaining, it gets explained.', 'orto' ),
 	),
 );
 
