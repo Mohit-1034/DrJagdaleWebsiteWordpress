@@ -8,7 +8,7 @@
  *
  *   1. Hero          - who this is, where it is, and how to be seen today.
  *   2. Trust strip   - the four facts that answer "is this the right place",
- *                     on a panel straddling the join below the hero.
+ *                     on a panel straddling the join below the hero.  
  *   3. Speciality    - "which part of me hurts", the way people actually arrive.
  *   4. About         - the surgeon, briefly, with the credentials that matter.
  *   5. Conditions    - "what is it called", for the visitor who arrives with a
