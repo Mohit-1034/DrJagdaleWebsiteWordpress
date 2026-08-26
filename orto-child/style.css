@@ -1920,7 +1920,6 @@ body.home .page_content_wrap {
 	gap: 14px;
 	margin: 26px 0 0;
 	padding: 18px 20px;
-	border-left: 3px solid var(--djo-red);
 	border-radius: var(--djo-radius-sm);
 	background-color: #FCEDED;
 	color: #7A1F26;
@@ -1967,6 +1966,82 @@ body.home .page_content_wrap {
 
 
 /* ---------- Reviews ---------- */
+
+/* ---------- The rating summary ----------
+   Verdict, score, count, source - stacked and centred, directly under the
+   section title and above the rolling row. It replaces the sentence that used
+   to sit in the section head: the same three facts, but a star row is read at
+   a glance where "Rated 4.8 from 165 reviews on Google" has to be read.
+
+   Google's mark is here rather than the word, and it is the real four-colour
+   G. That is a deliberate reversal of the note further down this file - the
+   reviews ARE Google reviews and the mark is the fastest way to say so - but
+   it also means the mark now carries a claim, so the score and the count under
+   it must keep matching the Business Profile. Change them together.
+------------------------------------------------------------ */
+
+.djo_reviews_summary {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	margin: -14px 0 clamp(34px, 3.6vw, 48px);
+	text-align: center;
+}
+
+.djo_reviews_verdict {
+	margin: 0;
+	color: #ffffff;
+	font-size: clamp(17px, 1.7vw, 21px);
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+}
+
+/* The stars are the summary's headline, so they are set well above the 16px
+   the card rows use. Sized on the svg rather than with a font-size, because
+   these are drawn shapes and not glyphs. */
+.djo_reviews_summary .djo_stars {
+	gap: 4px;
+	color: rgba(255, 255, 255, 0.22);
+}
+
+.djo_reviews_summary .djo_stars svg {
+	width: clamp(26px, 2.6vw, 34px);
+	height: clamp(26px, 2.6vw, 34px);
+}
+
+.djo_reviews_count {
+	margin: 0;
+	color: rgba(255, 255, 255, 0.62);
+	font-size: 15px;
+}
+
+.djo_reviews_count strong {
+	color: #ffffff;
+	font-size: 17px;
+	font-weight: 700;
+}
+
+/* The mark and the word beside it. The word is set in the site's own face on
+   purpose - an approximation of the Google wordmark would be worse than not
+   using it, and the mark alone already does the identifying. */
+.djo_reviews_source {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	margin: 2px 0 0;
+	color: rgba(255, 255, 255, 0.78);
+	font-size: 15px;
+	font-weight: 600;
+	letter-spacing: 0.01em;
+}
+
+.djo_reviews_source svg {
+	width: 22px;
+	height: 22px;
+}
+
 
 /* ---------- The rolling reviews ----------
    Markup: front-page.php, which prints the set twice into one track.
@@ -2072,15 +2147,29 @@ body.home .page_content_wrap {
 	margin-bottom: 16px;
 }
 
-/* Where the review came from. Said plainly rather than with Google's own mark:
-   using the logo implies a verified integration, and these are transcribed by
-   hand. */
+/* Where the review came from - Google's own mark, in the card's top-right
+   corner where the eye already expects a source badge. The word is left to the
+   screen reader: at this size the G is recognised faster than "GOOGLE" is
+   read, and the label would compete with the stars beside it. */
 .djo_review_source {
-	color: rgba(255, 255, 255, 0.45);
-	font-size: 11px;
-	font-weight: 600;
-	letter-spacing: 0.1em;
-	text-transform: uppercase;
+	display: inline-flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	border-radius: 50%;
+	background-color: rgba(255, 255, 255, 0.94);
+	transition: transform var(--djo-base) var(--djo-spring);
+}
+
+.djo_review_source svg {
+	width: 17px;
+	height: 17px;
+}
+
+.djo_review:hover .djo_review_source {
+	transform: scale(1.08);
 }
 
 .djo_reviews .djo_review blockquote.djo_review_text {

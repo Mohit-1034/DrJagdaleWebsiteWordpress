@@ -442,15 +442,42 @@ get_header();
 				array(
 					'eyebrow' => __( 'Patient reviews', 'orto' ),
 					'title'   => __( 'What patients say', 'orto' ),
-					'text'    => sprintf(
-						/* translators: 1: rating out of five, 2: number of reviews. */
-						esc_html__( 'Rated %1$s from %2$s reviews on Google.', 'orto' ),
-						esc_html( $djo_business['rating'] ),
-						esc_html( $djo_business['rating_count'] )
-					),
 				)
 			);
 			?>
+
+			<?php
+			/*
+			 * The rating summary, standing in for the sentence that used to sit
+			 * under the title. Same three facts - verdict, score, how many
+			 * reviews - but read at a glance rather than in a line of prose,
+			 * and signed with Google's own mark so it is obvious where the
+			 * number comes from without anyone having to say so.
+			 */
+			?>
+			<div class="djo_reviews_summary">
+				<p class="djo_reviews_verdict"><?php esc_html_e( 'Excellent', 'orto' ); ?></p>
+
+				<?php echo orto_child_stars( 5 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+
+				<p class="djo_reviews_count">
+					<strong><?php echo esc_html( $djo_business['rating'] ); ?></strong>
+					<?php
+					echo esc_html(
+						sprintf(
+							/* translators: %s: number of reviews. */
+							__( 'based on %s reviews', 'orto' ),
+							$djo_business['rating_count']
+						)
+					);
+					?>
+				</p>
+
+				<p class="djo_reviews_source">
+					<?php echo orto_child_icon( 'google' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<span><?php esc_html_e( 'Google', 'orto' ); ?></span>
+				</p>
+			</div>
 
 			<?php
 			/*
@@ -483,7 +510,10 @@ get_header();
 
 								<div class="djo_review_head">
 									<?php echo orto_child_stars( $djo_review['rating'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-									<span class="djo_review_source"><?php esc_html_e( 'Google', 'orto' ); ?></span>
+									<span class="djo_review_source" title="<?php esc_attr_e( 'Review left on Google', 'orto' ); ?>">
+										<?php echo orto_child_icon( 'google' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+										<span class="screen-reader-text"><?php esc_html_e( 'Review left on Google', 'orto' ); ?></span>
+									</span>
 								</div>
 
 								<blockquote class="djo_review_text"><p><?php echo esc_html( $djo_review['text'] ); ?></p></blockquote>
