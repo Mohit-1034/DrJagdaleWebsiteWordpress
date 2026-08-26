@@ -10,9 +10,13 @@
  *   2. Trust strip   - the four facts that answer "is this the right place".
  *   3. Speciality    - "which part of me hurts", the way people actually arrive.
  *   4. About         - the surgeon, briefly, with the credentials that matter.
- *   5. Services      - what the clinic can do about it, all under one roof.
- *   6. Reviews       - other patients saying it, which carries further than we can.
- *   7. CTA           - book.
+ *   5. Conditions    - "what is it called", for the visitor who arrives with a
+ *                     diagnosis rather than a symptom.
+ *   6. Services      - what the clinic can do about it, all under one roof.
+ *   7. Symptoms      - when it is worth coming in at all, and when to go
+ *                     straight to a hospital instead.
+ *   8. Reviews       - other patients saying it, which carries further than we can.
+ *   9. CTA           - book.
  *
  * @package ORTO
  */
@@ -36,13 +40,26 @@ get_header();
 	 * a scrim rather than beside the text, because the header stripe floats
 	 * over this band and needs something dark to sit on.
 	 * ------------------------------------------------------------------- */ ?>
-	<section class="djo_hero alignfull">
+	<section class="djo_hero djo_band djo_band_dark">
 		<?php $djo_hero_image = orto_child_image_url( 'hero-xray-review' ); ?>
 		<?php if ( $djo_hero_image ) { ?>
 			<div class="djo_hero_media" aria-hidden="true">
 				<img src="<?php echo esc_url( $djo_hero_image ); ?>" alt="" fetchpriority="high" decoding="async">
 			</div>
 		<?php } ?>
+
+		<?php
+		/*
+		 * The spine watermark. A decorative vertebral column set behind the
+		 * copy and bleeding off the top and bottom of the band, which is what
+		 * gives the navy something to be rather than a flat rectangle.
+		 *
+		 * It is a background-image on an empty element rather than inline SVG:
+		 * nothing needs to reach inside it, and this way it costs the document
+		 * one div instead of fourteen groups of paths.
+		 */
+		?>
+		<span class="djo_spine djo_spine_hero" aria-hidden="true"></span>
 
 		<div class="content_wrap">
 			<div class="djo_hero_body">
@@ -136,7 +153,7 @@ get_header();
 	 * By the part of the body, because that is what a patient can name. The
 	 * clinical vocabulary comes later, on the Speciality page itself.
 	 * ------------------------------------------------------------------- */ ?>
-	<section class="djo_section djo_section_speciality">
+	<section class="djo_band djo_band_light djo_section_speciality">
 		<div class="content_wrap">
 			<?php
 			orto_child_section_head(
@@ -176,7 +193,9 @@ get_header();
 	<?php /* ---------------------------------------------------------------
 	 * 4. About the surgeon
 	 * ------------------------------------------------------------------- */ ?>
-	<section class="djo_section djo_about_band">
+	<section class="djo_band djo_band_dark djo_about_band">
+		<span class="djo_spine djo_spine_about" aria-hidden="true"></span>
+
 		<div class="content_wrap">
 			<div class="djo_split">
 
@@ -241,9 +260,74 @@ get_header();
 
 
 	<?php /* ---------------------------------------------------------------
-	 * 5. Services
+	 * 5. Orthopaedic conditions
+	 *
+	 * The Speciality cards above answer "where does it hurt". This answers
+	 * "what is it called" - for the visitor who has already been given a name
+	 * for it somewhere else and is checking whether this clinic treats it.
+	 *
+	 * The rail below the prose is one row of eight: icon, a dot on a rule, and
+	 * a short label. The rule is drawn once across the whole row rather than
+	 * per item, so the dots read as stops on one line instead of eight
+	 * unrelated ticks.
 	 * ------------------------------------------------------------------- */ ?>
-	<section class="djo_section djo_section_services">
+	<section class="djo_band djo_band_light djo_conditions">
+		<div class="content_wrap">
+
+			<div class="djo_conditions_intro">
+				<div class="djo_conditions_copy">
+					<span class="djo_eyebrow"><?php esc_html_e( 'Orthopaedic conditions', 'orto' ); ?></span>
+					<h2 class="djo_conditions_title">
+						<?php
+						printf(
+							/* translators: %s: the emphasised part of the heading. */
+							wp_kses_post( __( 'Causes of %s that our clinic treats', 'orto' ) ),
+							'<strong>' . esc_html__( 'bone, joint &amp; spine pain', 'orto' ) . '</strong>'
+						);
+						?>
+					</h2>
+					<p>
+						<?php esc_html_e( 'Many conditions end in the same complaint - pain, stiffness, weakness or numbness - in a joint, along the spine, or spreading into an arm or a leg. The complaint rarely tells you which one it is.', 'orto' ); ?>
+					</p>
+					<p>
+						<?php esc_html_e( 'Finding the root cause is what makes a treatment plan work rather than merely pass the time. With digital X-ray in the clinic, the diagnosis and the plan are usually settled in the same visit.', 'orto' ); ?>
+					</p>
+				</div>
+
+				<?php $djo_conditions_image = orto_child_image_url( 'conditions' ); ?>
+				<?php if ( $djo_conditions_image ) { ?>
+					<div class="djo_conditions_media">
+						<img src="<?php echo esc_url( $djo_conditions_image ); ?>" alt="<?php esc_attr_e( 'An illustration of the lumbar spine, with the painful segment highlighted', 'orto' ); ?>" loading="lazy" decoding="async">
+					</div>
+				<?php } ?>
+			</div>
+
+			<ul class="djo_rail">
+				<?php foreach ( orto_child_get_conditions() as $djo_condition ) { ?>
+					<li class="djo_rail_item">
+						<span class="djo_rail_icon" aria-hidden="true">
+							<?php echo orto_child_menu_icon( $djo_condition['icon'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						</span>
+						<span class="djo_rail_dot" aria-hidden="true"></span>
+						<span class="djo_rail_label"><?php echo wp_kses_post( $djo_condition['label'] ); ?></span>
+					</li>
+				<?php } ?>
+			</ul>
+
+			<p class="djo_conditions_more">
+				<a class="djo_button djo_button_outline" href="<?php echo esc_url( $djo_speciality ); ?>">
+					<?php esc_html_e( 'See all conditions we treat', 'orto' ); ?>
+				</a>
+			</p>
+
+		</div>
+	</section>
+
+
+	<?php /* ---------------------------------------------------------------
+	 * 6. Services
+	 * ------------------------------------------------------------------- */ ?>
+	<section class="djo_band djo_band_dark djo_section_services">
 		<div class="content_wrap">
 			<?php
 			orto_child_section_head(
@@ -273,9 +357,79 @@ get_header();
 
 
 	<?php /* ---------------------------------------------------------------
-	 * 6. Reviews
+	 * 7. Signs and symptoms
+	 *
+	 * The section that turns "it will probably settle" into a decision. Written
+	 * as things a visitor can check against themselves this evening rather than
+	 * as a list of diagnoses, and numbered so the list can be counted at a
+	 * glance instead of read as a wall.
+	 *
+	 * The red-flag note at the foot is deliberately not a call to action for
+	 * this clinic. Cauda equina and an open fracture are emergencies, and a
+	 * page that answered them with "book an appointment" would be doing the
+	 * reader harm to win a booking.
 	 * ------------------------------------------------------------------- */ ?>
-	<section class="djo_section djo_reviews">
+	<section class="djo_band djo_band_light djo_symptoms">
+		<div class="content_wrap">
+			<?php
+			orto_child_section_head(
+				array(
+					'eyebrow' => __( 'Signs and symptoms', 'orto' ),
+					'title'   => __( 'When it is worth having it looked at', 'orto' ),
+					'text'    => __( 'Most aches settle on their own. These are the ones that usually do not - if any of them sounds like you, it is worth a consultation.', 'orto' ),
+				)
+			);
+			?>
+
+			<div class="djo_symptoms_layout">
+
+				<?php $djo_symptoms_image = orto_child_image_url( 'symptoms' ); ?>
+				<?php if ( $djo_symptoms_image ) { ?>
+					<div class="djo_symptoms_media">
+						<img src="<?php echo esc_url( $djo_symptoms_image ); ?>" alt="<?php esc_attr_e( 'A patient holding a painful shoulder', 'orto' ); ?>" loading="lazy" decoding="async">
+					</div>
+				<?php } ?>
+
+				<div class="djo_symptoms_body">
+					<ol class="djo_symptoms_list">
+						<?php foreach ( orto_child_get_symptoms() as $djo_symptom_index => $djo_symptom ) { ?>
+							<li class="djo_symptoms_item">
+								<span class="djo_symptoms_num" aria-hidden="true"><?php echo esc_html( sprintf( '%02d', $djo_symptom_index + 1 ) ); ?></span>
+								<span class="djo_symptoms_text"><?php echo esc_html( $djo_symptom ); ?></span>
+							</li>
+						<?php } ?>
+					</ol>
+
+					<p class="djo_symptoms_note">
+						<span class="djo_symptoms_note_icon" aria-hidden="true"><?php echo orto_child_icon( 'shield' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+						<span>
+							<strong><?php esc_html_e( 'Do not wait for an appointment if:', 'orto' ); ?></strong>
+							<?php esc_html_e( 'a bone is visibly out of shape or through the skin, a limb is cold or has lost sensation, or you have lost control of your bladder or bowels. Go to your nearest hospital.', 'orto' ); ?>
+						</span>
+					</p>
+
+					<p class="djo_symptoms_actions">
+						<a class="djo_button djo_button_solid" href="<?php echo esc_url( $djo_contact ); ?>">
+							<?php esc_html_e( 'Book a consultation', 'orto' ); ?>
+						</a>
+						<?php if ( ! empty( $djo_business['phone'] ) ) { ?>
+							<a class="djo_symptoms_phone" href="tel:<?php echo esc_attr( $djo_business['phone_link'] ); ?>">
+								<?php echo orto_child_icon( 'phone' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								<?php echo esc_html( $djo_business['phone'] ); ?>
+							</a>
+						<?php } ?>
+					</p>
+				</div>
+
+			</div>
+		</div>
+	</section>
+
+
+	<?php /* ---------------------------------------------------------------
+	 * 8. Reviews
+	 * ------------------------------------------------------------------- */ ?>
+	<section class="djo_band djo_band_dark djo_reviews">
 		<div class="content_wrap">
 			<?php
 			orto_child_section_head(

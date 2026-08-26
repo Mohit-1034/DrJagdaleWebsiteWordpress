@@ -99,7 +99,10 @@ while ( have_posts() ) {
 			</section>
 
 			<?php /* ------------------------------------------ The surgeon */ ?>
-			<section class="djo_section djo_about_band">
+			<section class="djo_band djo_band_dark djo_about_band">
+				<span class="djo_spine djo_spine_about" aria-hidden="true"></span>
+
+				<div class="content_wrap">
 				<div class="djo_split">
 
 					<div class="djo_split_media">
@@ -159,10 +162,12 @@ while ( have_posts() ) {
 					</div>
 
 				</div>
+				</div>
 			</section>
 
 			<?php /* ----------------------------------------- Education */ ?>
-			<section class="djo_section djo_education">
+			<section class="djo_band djo_band_light djo_education">
+				<div class="content_wrap">
 				<?php
 				orto_child_section_head(
 					array(
@@ -183,10 +188,12 @@ while ( have_posts() ) {
 						</li>
 					<?php } ?>
 				</ol>
+				</div>
 			</section>
 
 			<?php /* -------------------------------------- What we stand for */ ?>
-			<section class="djo_section djo_values">
+			<section class="djo_band djo_band_dark djo_values">
+				<div class="content_wrap">
 				<?php
 				orto_child_section_head(
 					array(
@@ -205,10 +212,12 @@ while ( have_posts() ) {
 						</li>
 					<?php } ?>
 				</ul>
+				</div>
 			</section>
 
 			<?php /* ------------------------------------------ The facilities */ ?>
-			<section class="djo_section djo_facilities">
+			<section class="djo_band djo_band_light djo_facilities">
+				<div class="content_wrap">
 				<?php
 				orto_child_section_head(
 					array(
@@ -243,6 +252,7 @@ while ( have_posts() ) {
 					}
 					?>
 				</ul>
+				</div>
 			</section>
 
 			<?php

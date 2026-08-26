@@ -568,7 +568,7 @@ if ( ! function_exists( 'orto_child_cta_band' ) ) {
 			)
 		);
 		?>
-		<section class="djo_cta alignfull">
+		<section class="djo_cta djo_band djo_band_deep">
 			<div class="content_wrap">
 				<div class="djo_cta_inner">
 					<span class="djo_eyebrow djo_eyebrow_light"><?php echo esc_html( $args['eyebrow'] ); ?></span>
@@ -625,6 +625,68 @@ if ( ! function_exists( 'orto_child_section_head' ) ) {
 			<?php } ?>
 		</header>
 		<?php
+	}
+}
+
+/**
+ * The orthopaedic conditions the clinic treats, for the home page's rail.
+ *
+ * Deliberately a flat list of named conditions rather than the joint-by-joint
+ * tree in inc/nav.php. The two answer different questions: the Speciality menu
+ * answers "where does it hurt", which is what a patient can name on arrival;
+ * this answers "what is it called", which is what someone who has already been
+ * given a diagnosis elsewhere is searching for. Keeping them separate is also
+ * what lets this rail stay eight items long - the width of the rail is the
+ * constraint, and it should not be set by how many joints the menu covers.
+ *
+ * 'icon' is a file name in images/icons/. 'label' is broken over two lines in
+ * the rail, so keep each one short.
+ *
+ * @return array
+ */
+if ( ! function_exists( 'orto_child_get_conditions' ) ) {
+	function orto_child_get_conditions() {
+		return apply_filters(
+			'orto_child_conditions',
+			array(
+				array( 'icon' => 'joint',        'label' => __( 'Osteoarthritis', 'orto' ) ),
+				array( 'icon' => 'slipped-disc', 'label' => __( 'Slipped Disc &amp; Sciatica', 'orto' ) ),
+				array( 'icon' => 'fracture',     'label' => __( 'Fractures &amp; Dislocations', 'orto' ) ),
+				array( 'icon' => 'spine-pain',   'label' => __( 'Cervical Spondylosis', 'orto' ) ),
+				array( 'icon' => 'shoulder',     'label' => __( 'Frozen Shoulder', 'orto' ) ),
+				array( 'icon' => 'knee',         'label' => __( 'Ligament &amp; ACL Injury', 'orto' ) ),
+				array( 'icon' => 'hand',         'label' => __( 'Nerve Compression', 'orto' ) ),
+				array( 'icon' => 'foot',         'label' => __( 'Heel &amp; Foot Pain', 'orto' ) ),
+			)
+		);
+	}
+}
+
+/**
+ * The signs that mean a joint or a back is worth having looked at.
+ *
+ * Written as things a patient can check against themselves this evening, not as
+ * a list of diagnoses - the point of the section is to turn "it will probably
+ * settle" into a decision. The red-flag note that follows it on the home page
+ * is separate and deliberately worded to send people to a hospital rather than
+ * to this clinic.
+ *
+ * @return array
+ */
+if ( ! function_exists( 'orto_child_get_symptoms' ) ) {
+	function orto_child_get_symptoms() {
+		return apply_filters(
+			'orto_child_symptoms',
+			array(
+				__( 'The pain has not settled after two weeks of rest', 'orto' ),
+				__( 'It started with a fall, a blow or an accident', 'orto' ),
+				__( 'Pain shoots down an arm or a leg', 'orto' ),
+				__( 'The joint hurts at rest, or wakes you at night', 'orto' ),
+				__( 'A joint is swollen, locked, or out of shape', 'orto' ),
+				__( 'You cannot put weight on it, or it gives way', 'orto' ),
+				__( 'You feel numbness, tingling or weakness in a limb', 'orto' ),
+			)
+		);
 	}
 }
 

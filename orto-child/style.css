@@ -20,65 +20,294 @@ Template: orto
 ------------------------------------------------------------ */
 
 
-/* Brand palette
+/* Palette
    ------------------------------------------------------------
-   The parent skin ships a warm sage-green scheme. The clinic's own identity is
-   cool: a navy wordmark, a red rule and the olive tree in the mark, and the
-   whole supplied icon set is drawn in #4B5FA5. Rather than fight that with a
-   second set of colours layered on top, the theme's own tokens are redefined
-   here - so every component the parent renders (buttons, links, inputs,
-   pagination, the blog) follows the clinic's palette without any of them being
-   restyled one at a time.
+   Two grounds and nothing between them: white and a near-black navy. The page
+   alternates between the two, full width, the whole way down.
 
-   Only the --theme-color-* names the theme actually emits are used. Names like
-   "alter_bg_color" and "text_link" exist as PHP-side aliases only and resolve
-   to nothing in CSS.
+   The tinted blues that used to sit between them are gone. A #F1F4FA band next
+   to a white one is a difference you have to look for, so the page read as one
+   undifferentiated scroll with faint seams in it; and against the clinic's own
+   navy those tints made the whole site look washed out. White against near-black
+   is a difference nobody has to look for.
 
-   Contrast, checked against --djo-surface (#ffffff):
-     --theme-color-title  #1B2A4A   13.1:1
-     --theme-color-text   #4A5568    7.6:1
-     --theme-color-link   #2C4585   9.6:1
-     --theme-color-meta   #6B7688    4.8:1
-   The red is an accent only - it is never asked to carry body copy.
+   Where a surface still has to lift off its ground - an icon chip, a form field,
+   the hours card - it uses a neutral grey, never a blue one. The blue is kept
+   for the things that are actually blue: the brand, the links, the buttons and
+   the supplied icon set.
+
+   The parent skin sets its own tokens on `.scheme_default, body.scheme_default`
+   in skins/default/css/__custom.css, and `body.scheme_default` (0,1,1) outranks
+   a bare `:root` (0,1,0) - so an override written only on :root loses and the
+   theme's sage green comes back everywhere a --theme-color-* is read. Matching
+   the parent's own selector makes the two equal, and this stylesheet is
+   enqueued after theirs, so the later rule wins.
+
+   Contrast, against white:
+     --theme-color-title  #10192B  15.9:1
+     --theme-color-text   #454C59   8.4:1
+     --theme-color-link   #24407D  10.3:1
+   and against --djo-ink:
+     #ffffff              16.4:1
+     rgba(255,255,255,.78) ~10:1
 ------------------------------------------------------------ */
 
-/* The selector list is not decoration. The parent skin sets its tokens on
-   `.scheme_default, body.scheme_default, ...` in skins/default/css/__custom.css,
-   and `body.scheme_default` (0,1,1) outranks a bare `:root` (0,1,0) - so an
-   override written only on :root loses, and the theme's own sage green comes
-   back everywhere a --theme-color-* is read (the current menu item, the contact
-   page's icons, every link the parent styles). Matching the parent's own
-   selector makes the two equal, and this stylesheet is enqueued after theirs,
-   so the later rule wins. :root is kept alongside it for anything rendered
-   outside a scheme wrapper. */
 :root,
 .scheme_default,
 body.scheme_default {
-	/* The clinic's own colours, named for what they are. */
-	--djo-navy: #1B2A4A;
-	--djo-blue: #2C4585;
+	/* The two grounds. */
+	--djo-paper: #ffffff;
+	--djo-ink: #10192B;
+	/* One step deeper, for the closing call to action and the footer, so the
+	   page darkens towards its end rather than repeating one flat black. */
+	--djo-ink-deep: #080E1A;
+
+	/* The brand blues. Accents only - no band is ever painted in these. */
+	--djo-blue: #24407D;
 	--djo-blue-bright: #4B5FA5; /* the supplied icon set's own line colour */
+	--djo-blue-pale: #9DB2E0;   /* for accents ON the dark bands only */
 	--djo-red: #C8202B;         /* the signage rule; an accent, never body copy */
-	--djo-olive: #7E8F3F;       /* the tree in the mark */
 
-	--djo-surface: #ffffff;
-	--djo-tint: #F1F4FA;
-	--djo-rule: #DFE5F0;
+	/* Neutral, not blue-grey. These are the only greys on the site. */
+	--djo-chip: #F3F4F6;        /* icon chips, form fields, quiet cards */
+	--djo-rule: #E3E5E9;        /* hairlines on white */
+	--djo-rule-dark: rgba(255, 255, 255, 0.14);
+	--djo-card-dark: rgba(255, 255, 255, 0.045);
 
-	/* Redefinitions of the parent skin's own tokens. */
+	/* The parent skin's own tokens, redefined. */
 	--theme-color-bg_color: #ffffff;
-	--theme-color-bg_color_2: #F1F4FA;
-	--theme-color-bd_color: #DFE5F0;
-	--theme-color-title: #1B2A4A;
-	--theme-color-text: #4A5568;
-	--theme-color-meta: #6B7688;
-	--theme-color-link: #2C4585;
-	--theme-color-hover: #1B2A4A;
+	--theme-color-bg_color_2: #F3F4F6;
+	--theme-color-bd_color: #E3E5E9;
+	--theme-color-title: #10192B;
+	--theme-color-text: #454C59;
+	--theme-color-meta: #6A7180;
+	--theme-color-link: #24407D;
+	--theme-color-hover: #10192B;
 
 	--djo-radius: 14px;
 	--djo-radius-sm: 10px;
-	--djo-shadow: 0 4px 20px rgba(27, 42, 74, 0.07);
-	--djo-shadow-lift: 0 14px 34px rgba(27, 42, 74, 0.13);
+	--djo-shadow: 0 4px 20px rgba(16, 25, 43, 0.07);
+	--djo-shadow-lift: 0 16px 38px rgba(16, 25, 43, 0.14);
+}
+
+
+/* Full-width bands
+   ------------------------------------------------------------
+   Every section that carries a background is one of these. The band runs the
+   full width of the window; the container inside it holds the text to the same
+   measure as the rest of the page.
+
+   The breakout is width:100vw with matching negative side margins, rather than
+   the theme's own .alignfull, which leaves a gutter each side - right for a map
+   set into an article, wrong for a band meant to run into the corners of the
+   window.
+------------------------------------------------------------ */
+
+.djo_band {
+	position: relative;
+	width: 100vw;
+	max-width: 100vw;
+	margin-right: calc(-50vw + 50%);
+	margin-left: calc(-50vw + 50%);
+	padding: clamp(56px, 6.5vw, 104px) 0;
+}
+
+/* The theme's .content_wrap takes its width from its parent, and the parent is
+   now the whole window - so inside a band it stops constraining anything and
+   the copy runs into the edge of the screen. Restated here against the theme's
+   own page-width variable. */
+.djo_band > .content_wrap {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: var(--theme-var-page_width, 1290px);
+	margin-right: auto;
+	margin-left: auto;
+	padding-right: clamp(20px, 4vw, 60px);
+	padding-left: clamp(20px, 4vw, 60px);
+}
+
+/* Each variant publishes its own ground as --djo-band-bg. Anything that has to
+   paint itself out of the band it sits on - the conditions rail punches a hole
+   in its own rule behind each dot - reads that rather than naming a colour, so
+   flipping a band from light to dark takes those with it. */
+.djo_band_light {
+	--djo-band-bg: var(--djo-paper);
+	background-color: var(--djo-paper);
+}
+
+.djo_band_dark {
+	--djo-band-bg: var(--djo-ink);
+	background-color: var(--djo-ink);
+	color: rgba(255, 255, 255, 0.78);
+}
+
+.djo_band_deep {
+	--djo-band-bg: var(--djo-ink-deep);
+	background-color: var(--djo-ink-deep);
+	color: rgba(255, 255, 255, 0.78);
+}
+
+/* ---------- What a dark band does to everything inside it ----------
+   Written once, here, rather than by giving each component a dark variant of
+   its own. Any section can be flipped by changing one class in the template and
+   everything in it follows. */
+
+.djo_band_dark,
+.djo_band_deep {
+	--djo-rule: var(--djo-rule-dark);
+	--theme-color-bd_color: rgba(255, 255, 255, 0.14);
+	--theme-color-title: #ffffff;
+	--theme-color-text: rgba(255, 255, 255, 0.78);
+	--theme-color-meta: rgba(255, 255, 255, 0.55);
+	--djo-chip: rgba(255, 255, 255, 0.07);
+	--djo-shadow: none;
+}
+
+.djo_band_dark .djo_eyebrow,
+.djo_band_deep .djo_eyebrow {
+	color: rgba(255, 255, 255, 0.55);
+}
+
+.djo_band_dark .djo_head_title,
+.djo_band_deep .djo_head_title {
+	color: #ffffff;
+}
+
+.djo_band_dark .djo_head_text,
+.djo_band_deep .djo_head_text {
+	color: rgba(255, 255, 255, 0.72);
+}
+
+/* The supplied icons are drawn in a mid blue that all but vanishes on the dark
+   bands. brightness(0) crushes them to black whatever colour they started, and
+   invert(1) takes that to white - so one filter whitens the whole set without a
+   second copy of every file. */
+.djo_band_dark .djo_icon,
+.djo_band_deep .djo_icon {
+	filter: brightness(0) invert(1);
+	opacity: 0.92;
+}
+
+/* On dark, the outline button's hairline is the only thing describing it. */
+.djo_band_dark .djo_button_outline,
+.djo_band_deep .djo_button_outline {
+	border-color: rgba(255, 255, 255, 0.4);
+	color: #ffffff;
+}
+
+.djo_band_dark .djo_button_outline:hover,
+.djo_band_dark .djo_button_outline:focus-visible,
+.djo_band_deep .djo_button_outline:hover,
+.djo_band_deep .djo_button_outline:focus-visible {
+	border-color: #ffffff;
+	background-color: rgba(255, 255, 255, 0.1);
+	color: #ffffff !important;
+}
+
+/* Every card-shaped surface on the site, told what to be on a dark band. A
+   white card on near-black is a headlight; a barely-lifted translucent white
+   with a hairline reads as the same card in a different room, which is what it
+   is. Listed rather than done with a shared class because these components were
+   written before the bands were, and a class on each would have to be kept in
+   step by hand in eight templates. */
+.djo_band_dark .djo_card_link,
+.djo_band_dark .djo_service,
+.djo_band_dark .djo_review,
+.djo_band_dark .djo_value,
+.djo_band_dark .djo_facility,
+.djo_band_dark .djo_symptoms_item,
+.djo_band_deep .djo_card_link,
+.djo_band_deep .djo_service,
+.djo_band_deep .djo_review,
+.djo_band_deep .djo_value,
+.djo_band_deep .djo_facility,
+.djo_band_deep .djo_symptoms_item {
+	border-color: var(--djo-rule-dark);
+	background-color: var(--djo-card-dark);
+	box-shadow: none;
+}
+
+.djo_band_dark .djo_card_link:hover,
+.djo_band_dark .djo_service:hover,
+.djo_band_dark .djo_card_link:focus-visible,
+.djo_band_deep .djo_card_link:hover,
+.djo_band_deep .djo_service:hover {
+	border-color: rgba(255, 255, 255, 0.3);
+	background-color: rgba(255, 255, 255, 0.08);
+	box-shadow: none;
+}
+
+/* The icon chip inside a card on a dark band. Two translucent whites stacked -
+   the card at 4.5% and the chip at 7% - which is enough of a step to read as a
+   chip without either becoming a bright shape. */
+.djo_band_dark .djo_card_icon,
+.djo_band_dark .djo_service_icon,
+.djo_band_deep .djo_card_icon,
+.djo_band_deep .djo_service_icon {
+	background-color: rgba(255, 255, 255, 0.07);
+}
+
+/* Blue on near-black is two dark tones with almost nothing between them - the
+   ticks down the Speciality page all but vanished on the dark bands - so every
+   accent that is the brand blue on white takes its pale tint here instead.
+
+   One selector list rather than a dark rule beside each component: these are
+   all the same decision, and splitting it up is how half of them get missed the
+   next time a band is flipped. */
+.djo_band_dark .djo_split_creds,
+.djo_band_dark .djo_split_facts svg,
+.djo_band_dark .djo_service_title a:hover,
+.djo_band_dark .djo_trust_value,
+.djo_band_dark .djo_entry_tick,
+.djo_band_dark .djo_entry_phone svg,
+.djo_band_dark .djo_entry_phone:hover,
+.djo_band_dark .djo_symptoms_num,
+.djo_band_dark .djo_symptoms_phone svg,
+.djo_band_dark .djo_value_icon,
+.djo_band_dark .djo_timeline_year,
+.djo_band_dark .djo_conditions_copy strong,
+.djo_band_deep .djo_split_creds,
+.djo_band_deep .djo_split_facts svg,
+.djo_band_deep .djo_entry_tick,
+.djo_band_deep .djo_entry_phone svg {
+	color: var(--djo-blue-pale);
+}
+
+/* Same for the surfaces those accents sat on. */
+.djo_band_dark .djo_value_icon,
+.djo_band_dark .djo_entry_icon,
+.djo_band_dark .djo_jump_link,
+.djo_band_deep .djo_entry_icon {
+	background-color: rgba(255, 255, 255, 0.07);
+}
+
+.djo_band_dark .djo_jump_link {
+	border-color: var(--djo-rule-dark);
+	color: #ffffff;
+}
+
+.djo_band_dark .djo_jump_link:hover,
+.djo_band_dark .djo_jump_link:focus-visible {
+	border-color: rgba(255, 255, 255, 0.4);
+	background-color: rgba(255, 255, 255, 0.12);
+	color: #ffffff;
+}
+
+/* The solid blue button has almost nothing to separate it from a near-black
+   ground, so on dark it inverts: white ground, dark label. */
+.djo_band_dark .djo_button_solid,
+.djo_band_deep .djo_button_solid {
+	background-color: #ffffff;
+	color: var(--djo-ink);
+}
+
+.djo_band_dark .djo_button_solid:hover,
+.djo_band_dark .djo_button_solid:focus-visible,
+.djo_band_deep .djo_button_solid:hover,
+.djo_band_deep .djo_button_solid:focus-visible {
+	background-color: rgba(255, 255, 255, 0.86);
+	color: var(--djo-ink) !important;
+	box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
 }
 
 
@@ -167,7 +396,7 @@ body.scheme_default {
 .djo_button_solid:hover,
 .djo_button_solid:focus-visible {
 	transform: translateY(-3px);
-	background-color: var(--djo-navy);
+	background-color: var(--djo-ink);
 	color: #ffffff !important;
 	box-shadow: 0 8px 20px rgba(27, 42, 74, 0.32);
 }
@@ -181,7 +410,7 @@ body.scheme_default {
 .djo_button_outline:hover,
 .djo_button_outline:focus-visible {
 	border-color: var(--djo-blue);
-	background-color: var(--djo-tint);
+	background-color: var(--djo-chip);
 	color: var(--djo-blue) !important;
 }
 
@@ -410,7 +639,7 @@ body.scheme_default {
 
 .djo_bar_phone:hover,
 .djo_bar_phone:focus-visible {
-	background-color: var(--djo-tint);
+	background-color: var(--djo-chip);
 }
 
 .djo_bar_phone_icon {
@@ -421,7 +650,7 @@ body.scheme_default {
 	width: 38px;
 	height: 38px;
 	border-radius: 50%;
-	background-color: var(--djo-tint);
+	background-color: var(--djo-chip);
 	color: var(--djo-blue);
 	transition: background-color .3s ease, color .3s ease;
 }
@@ -588,9 +817,12 @@ body.home.djo_header_stuck .top_panel_default {
 	position: absolute;
 	z-index: 999;
 	top: calc(100% + 10px);
-	right: 0;
-	left: 0;
-	padding: clamp(24px, 2.4vw, 36px);
+	/* Inset from the ends of the bar rather than flush with them. At full width
+	   the panel was a second header dropping out of the first; pulled in, it
+	   reads as a panel belonging to the item that opened it. */
+	right: 6%;
+	left: 6%;
+	padding: clamp(18px, 1.8vw, 26px);
 	border-radius: var(--djo-radius);
 	background-color: #ffffff;
 	box-shadow: var(--djo-shadow-lift);
@@ -619,86 +851,58 @@ body.home.djo_header_stuck .top_panel_default {
    class is absent, the "hide the theme's dropdown" rule never matches, and the
    parent theme's own dropdown does the job. Plainer, never broken. */
 
+/* A grid of destinations. Eight in both groups, so both panels are the same
+   shape and the same height and the menu does not jump as the pointer moves
+   between Speciality and Services. */
 .djo_mega_grid {
 	display: grid;
 	grid-template-columns: repeat(4, minmax(0, 1fr));
-	gap: clamp(18px, 2vw, 30px) clamp(20px, 2.4vw, 40px);
+	gap: 6px;
 }
 
-.djo_mega_col {
-	min-width: 0;
-}
-
-/* Icon and pill on one line, the way the reference layout has it. The whole
-   heading is one link, so the icon is part of the target rather than a
-   decoration beside it. */
-.djo_mega_head {
+/* One cell: icon left, name right, the whole thing a link. Sized so eight of
+   them make two calm rows rather than a wall - the panel is a set of doors, and
+   a door needs a handle and a name and nothing else. */
+.djo_mega_item {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	margin-bottom: 12px;
+	gap: 12px;
+	padding: 12px 14px;
+	border: 1px solid transparent;
+	border-radius: var(--djo-radius-sm);
+	color: var(--theme-color-title);
 	text-decoration: none;
+	transition: background-color .2s ease, border-color .2s ease, color .2s ease;
 }
 
-.djo_mega_head_icon {
+.djo_mega_item:hover,
+.djo_mega_item:focus-visible {
+	border-color: var(--djo-rule);
+	background-color: var(--djo-chip);
+	color: var(--djo-blue);
+}
+
+.djo_mega_item_icon {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	flex: 0 0 auto;
-	width: 34px;
-	height: 34px;
-}
-
-.djo_mega_head_pill {
-	display: inline-block;
-	padding: 8px 15px;
-	border-radius: 100px;
-	background-color: var(--djo-blue);
-	color: #ffffff;
-	font-size: 14px;
-	font-weight: 600;
-	line-height: 1.25;
-	transition: background-color .25s ease;
-}
-
-.djo_mega_head:hover .djo_mega_head_pill,
-.djo_mega_head:focus-visible .djo_mega_head_pill {
-	background-color: var(--djo-navy);
-}
-
-.djo_mega_list {
-	list-style: none;
-	margin: 0;
-	padding: 0 0 0 44px;
-}
-
-.djo_mega_list li {
-	position: relative;
-	margin-bottom: 7px;
-}
-
-.djo_mega_list li::before {
-	content: "";
-	position: absolute;
-	top: 0.62em;
-	left: -13px;
-	width: 5px;
-	height: 5px;
+	width: 42px;
+	height: 42px;
+	padding: 7px;
 	border-radius: 50%;
-	background-color: var(--djo-blue-bright);
+	background-color: var(--djo-chip);
+	transition: background-color .2s ease;
 }
 
-.djo_mega_list a {
-	color: var(--theme-color-text);
+.djo_mega_item:hover .djo_mega_item_icon {
+	background-color: #ffffff;
+}
+
+.djo_mega_item_label {
 	font-size: 14.5px;
-	line-height: 1.45;
-	text-decoration: none;
-	transition: color .2s ease;
-}
-
-.djo_mega_list a:hover,
-.djo_mega_list a:focus-visible {
-	color: var(--djo-blue);
+	font-weight: 600;
+	line-height: 1.3;
 }
 
 .djo_mega_foot {
@@ -706,9 +910,9 @@ body.home.djo_header_stuck .top_panel_default {
 	align-items: center;
 	justify-content: space-between;
 	gap: 20px;
-	margin-top: clamp(20px, 2vw, 28px);
-	padding-top: 18px;
-	border-top: 1px solid var(--theme-color-bd_color);
+	margin-top: 14px;
+	padding: 14px 14px 2px;
+	border-top: 1px solid var(--djo-rule);
 }
 
 .djo_mega_foot_text {
@@ -737,12 +941,6 @@ body.home.djo_header_stuck .top_panel_default {
 
 .djo_mega_foot_link:hover svg {
 	transform: translateX(4px);
-}
-
-/* Services has eight entries of two or three lines each; three columns give
-   them a comfortable measure where four would leave every title wrapping. */
-.djo_mega_services .djo_mega_grid {
-	grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 /* The mega panel replaces the theme's own dropdown for these two items. The
@@ -799,45 +997,16 @@ body.home .page_content_wrap {
 	padding-top: 0;
 }
 
-/* ---------- Full-bleed bands ----------
-   True edge to edge. The theme's own .alignfull leaves a small gutter each
-   side, which is right for a map sitting inside a page and wrong for a band
-   that is meant to run into the corners of the window. */
-
-.djo_hero.alignfull,
-.djo_cta.alignfull {
-	width: 100vw;
-	max-width: 100vw;
-	margin-right: calc(-50vw + 50%);
-	margin-left: calc(-50vw + 50%);
-}
-
-/* The theme's .content_wrap takes its width from its parent, and the parent is
-   now the whole window - so inside these bands it stopped constraining anything
-   and the hero copy ran into the left edge of the screen. Restated here against
-   the theme's own page-width variable, so a band that breaks out still sets its
-   text on the same measure as the rest of the page. */
-.djo_hero > .content_wrap,
-.djo_cta > .content_wrap {
-	box-sizing: border-box;
-	width: 100%;
-	max-width: var(--theme-var-page_width, 1290px);
-	margin-right: auto;
-	margin-left: auto;
-	padding-right: clamp(20px, 4vw, 60px);
-	padding-left: clamp(20px, 4vw, 60px);
-}
-
 /* ---------- Hero ---------- */
 
 /* The padding at the top clears the floating header, which is out of the flow
    above it and so reserves no space of its own. */
+/* .djo_band_dark paints it. The padding is its own: the floating header is out
+   of the flow above it and reserves no space, so the hero has to clear it. */
 .djo_hero {
-	position: relative;
-	padding: calc(var(--djo-header-h, 92px) + clamp(40px, 6vw, 96px)) 0 clamp(60px, 7vw, 110px);
+	padding-top: calc(var(--djo-header-h, 92px) + clamp(40px, 6vw, 96px));
+	padding-bottom: clamp(60px, 7vw, 110px);
 	overflow: hidden;
-	background-color: var(--djo-navy);
-	color: #ffffff;
 }
 
 .djo_hero_media {
@@ -852,17 +1021,27 @@ body.home .page_content_wrap {
 	object-position: center 35%;
 }
 
-/* Two layers, not one: a flat wash to sink the photograph far enough for white
-   text to clear AA anywhere on it, and a gradient that deepens towards the left
-   where the copy actually sits. A single flat scrim heavy enough for the
-   brightest part of this photograph would have greyed the whole image out. */
+/* The photograph is held to the right-hand half and the left is taken to solid
+   navy, which is the reference design's arrangement and here it settles a
+   specific problem: the photograph is itself an X-ray of a spine, so the spine
+   watermark laid over it read as a printing fault rather than as a device. On
+   clean navy it reads as what it is.
+
+   Solid to 44%, then a fast fall to a light veil - so the copy sits on flat
+   colour at guaranteed contrast, and the clinician at the right of the frame is
+   still legible rather than greyed out. The second flat layer is what keeps the
+   very brightest part of the lightbox from blowing out white. */
 .djo_hero_media::after {
 	content: "";
 	position: absolute;
 	inset: 0;
 	background:
-		linear-gradient(100deg, rgba(15, 25, 46, 0.93) 0%, rgba(15, 25, 46, 0.78) 45%, rgba(15, 25, 46, 0.55) 100%),
-		rgba(15, 25, 46, 0.2);
+		linear-gradient(100deg,
+			#131F3A 0%,
+			#131F3A 44%,
+			rgba(19, 31, 58, 0.86) 62%,
+			rgba(19, 31, 58, 0.55) 100%),
+		rgba(15, 25, 46, 0.25);
 }
 
 .djo_hero .content_wrap {
@@ -913,6 +1092,105 @@ body.home .page_content_wrap {
 	color: #ffffff;
 }
 
+/* ---------- The spine watermark ----------
+   A lumbar vertebral column standing behind the copy on the dark bands. Taken
+   from the reference design, where the same device carries the hero and the
+   surgeon's band and is what keeps them from reading as flat rectangles.
+
+   The artwork (images/spine-watermark.webp) was prepared from the supplied
+   render in three steps, and each was needed:
+     - Rotated 39 degrees anticlockwise. The source has the column running
+       corner to corner across a landscape frame, so at any size that spanned
+       the band it also swept diagonally across the headline. Standing it
+       upright makes it a column that can be given its own strip.
+     - Alpha multiplied by 3.5. It arrived at 15% alpha - a watermark built for
+       a white page, which against near-black said nothing at all. 3.5 stops
+       short of where the modelling flattens into a silhouette.
+     - Its own colour left alone. The cool lavender-white sits with the palette;
+       a recolour to flat white took the form out of it.
+
+   ALIGNMENT. The column has to read as one continuous spine passing behind the
+   band, not as a picture of a spine that starts and stops inside it. Three
+   things do that together:
+     - background-size: cover, with the element taller than the band at both
+       ends, so the artwork is always cropped rather than fitted - there is no
+       size at which its own top and bottom edges come into view.
+     - background-position: center, so the crop takes the middle of the column
+       and the vertebrae stay evenly spaced through the visible run.
+     - a mask that fades the first and last eighth to nothing, so the column
+       dissolves into the band instead of being cut off by it. That fade is what
+       makes it read as continuing past the edge; without it the eye finds the
+       cut and the illusion goes.
+
+   A background-image on an empty element, not an <img>: it is decoration and
+   must not be announced. pointer-events:none because it lies over the hero
+   photograph and would otherwise swallow clicks meant for the buttons. */
+.djo_spine {
+	position: absolute;
+	top: -14%;
+	bottom: -14%;
+	z-index: 0;
+	display: block;
+	background-image: url("images/spine-watermark.webp");
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: cover;
+	-webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 13%, #000 87%, transparent 100%);
+	mask-image: linear-gradient(to bottom, transparent 0%, #000 13%, #000 87%, transparent 100%);
+	pointer-events: none;
+}
+
+/* On the hero it stands in the gap between the copy's measure and the
+   photograph. The band is solid near-black to 44% and the prose is held to
+   60ch, so this strip is the one part of the hero with nothing else in it. */
+.djo_spine_hero {
+	left: 56%;
+	width: 21%;
+	opacity: 0.34;
+}
+
+/* The surgeon's band has no photograph competing with it, so the column stands
+   at the right-hand edge and is the only thing in that space. Quieter than the
+   hero: the band is taller, and the same weight of graphic reads heavier the
+   longer it runs. */
+.djo_spine_about {
+	right: 2%;
+	width: 16%;
+	opacity: 0.24;
+}
+
+@media (max-width: 1199px) {
+	/* The photograph's fade starts earlier as the band narrows, so the clear
+	   strip moves with it. */
+	.djo_spine_hero {
+		left: 62%;
+		width: 25%;
+		opacity: 0.3;
+	}
+}
+
+@media (max-width: 1023px) {
+	/* The copy runs the full width from here down and there is no clear strip
+	   left. Pushed half off the right edge, where it is texture at the margin
+	   rather than a shape competing with the headline. */
+	.djo_spine_hero {
+		left: auto;
+		right: -10%;
+		width: 32%;
+		opacity: 0.22;
+	}
+	/* The split has stacked, so the prose now runs under where the column stood. */
+	.djo_spine_about {
+		display: none;
+	}
+}
+
+@media (max-width: 767px) {
+	.djo_spine_hero {
+		display: none;
+	}
+}
+
 /* ---------- Trust strip ----------
    Lifted over the join between the hero and the page below it, so it reads as
    the answer to "is this the right place" before the visitor has to scroll. */
@@ -960,12 +1238,10 @@ body.home .page_content_wrap {
 
 /* ---------- Section rhythm ---------- */
 
-.djo_section {
-	padding: clamp(56px, 6vw, 96px) 0;
-}
-
+/* The Speciality band opens under the trust strip, which is lifted up into the
+   hero and leaves a shorter gap behind it than the other bands need. */
 .djo_section_speciality {
-	padding-top: clamp(48px, 5vw, 80px);
+	padding-top: clamp(40px, 4vw, 66px);
 }
 
 /* ---------- Speciality cards ---------- */
@@ -1013,7 +1289,7 @@ body.home .page_content_wrap {
 	width: 58px;
 	height: 58px;
 	border-radius: 50%;
-	background-color: var(--djo-tint);
+	background-color: var(--djo-chip);
 	padding: 12px;
 }
 
@@ -1031,8 +1307,23 @@ body.home .page_content_wrap {
 
 /* ---------- Split band: image beside prose ---------- */
 
+/* The surgeon's band. Everything that used to be reversed by hand here is now
+   done once by .djo_band_dark - this is only what is specific to the split. */
 .djo_about_band {
-	background-color: var(--djo-tint);
+	overflow: hidden;
+}
+
+.djo_about_band .content_wrap {
+	position: relative;
+	z-index: 1;
+}
+
+/* The photograph is the one bright thing on a dark band, so it gets a hairline
+   rather than a drop shadow - a shadow on near-black is invisible, and the ring
+   is what separates the image from the ground. */
+.djo_about_band .djo_split_media {
+	border: 1px solid var(--djo-rule-dark);
+	box-shadow: none;
 }
 
 .djo_split {
@@ -1105,10 +1396,6 @@ body.home .page_content_wrap {
 
 /* ---------- Services grid ---------- */
 
-.djo_section_services {
-	background-color: #ffffff;
-}
-
 .djo_services_grid {
 	display: grid;
 	grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1147,7 +1434,7 @@ body.home .page_content_wrap {
 	margin-bottom: 16px;
 	padding: 9px;
 	border-radius: var(--djo-radius-sm);
-	background-color: var(--djo-tint);
+	background-color: var(--djo-chip);
 }
 
 .djo_service_title {
@@ -1172,11 +1459,280 @@ body.home .page_content_wrap {
 	line-height: 1.6;
 }
 
-/* ---------- Reviews ---------- */
+/* Orthopaedic conditions (front-page.php)
+   ------------------------------------------------------------
+   Prose and an illustration side by side, then a full-width rail of eight
+   conditions: icon, a dot on a rule, and a short label under it.
+------------------------------------------------------------ */
 
-.djo_reviews {
-	background-color: var(--djo-tint);
+.djo_conditions_intro {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: clamp(28px, 4vw, 64px);
+	align-items: center;
+	margin-bottom: clamp(40px, 5vw, 72px);
 }
+
+.djo_conditions_title {
+	margin: 0 0 20px;
+	color: var(--theme-color-title);
+	font-size: clamp(26px, 3vw, 38px);
+	line-height: 1.18;
+	/* The heading's own weight is light; the clause inside <strong> is what
+	   carries it. Stated here because the theme sets headings bold by default,
+	   which would flatten the contrast the two weights are there to make. */
+	font-weight: 400;
+}
+
+.djo_conditions_title strong {
+	font-weight: 700;
+}
+
+.djo_conditions_copy p {
+	margin: 0 0 16px;
+	color: var(--theme-color-text);
+	font-size: 15.5px;
+	line-height: 1.7;
+}
+
+.djo_conditions_copy p:last-child {
+	margin-bottom: 0;
+}
+
+.djo_conditions_media img {
+	display: block;
+	width: 100%;
+	height: clamp(240px, 24vw, 330px);
+	border-radius: var(--djo-radius);
+	object-fit: cover;
+}
+
+/* ---------- The rail ----------
+   The rule is drawn once, across the whole row, rather than per item - eight
+   separate short rules read as eight unrelated ticks, where one line with stops
+   on it reads as a single set. It is a pseudo-element on the list so it can
+   span the full width regardless of how the items divide it up.
+
+   The rule is inset by half an item's width at each end so it starts and ends
+   under the first and last dots rather than running past them into nothing. */
+.djo_rail {
+	position: relative;
+	display: grid;
+	grid-template-columns: repeat(8, minmax(0, 1fr));
+	gap: 0;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.djo_rail::before {
+	content: "";
+	position: absolute;
+	right: calc(100% / 16);
+	left: calc(100% / 16);
+	/* Lines up with the centre of the dots: icon block + the gap above them. */
+	top: var(--djo-rail-line, 84px);
+	height: 1px;
+	background-color: var(--djo-rule);
+}
+
+.djo_rail_item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0;
+	padding: 0 6px;
+	text-align: center;
+}
+
+.djo_rail_icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 62px;
+	margin-bottom: 14px;
+}
+
+.djo_rail_icon .djo_icon {
+	width: auto;
+	max-width: 100%;
+	height: 100%;
+}
+
+/* The stop on the rule. position:relative lifts it over the line drawn behind
+   it, and the ring in the clinic's own blue is what makes it a marker rather
+   than a bullet that happens to sit on a rule. */
+.djo_rail_dot {
+	position: relative;
+	z-index: 1;
+	display: block;
+	width: 11px;
+	height: 11px;
+	margin-bottom: 16px;
+	border-radius: 50%;
+	background-color: var(--djo-blue-bright);
+	/* The ring is the band's own ground, read from --djo-band-bg: it exists to
+	   punch a hole in the rule drawn behind the dot, and a ring in any other
+	   colour shows as a halo. Reading the variable means the dot follows if the
+	   band is ever flipped from light to dark. */
+	box-shadow: 0 0 0 4px var(--djo-band-bg, #ffffff);
+}
+
+.djo_rail_label {
+	color: var(--theme-color-title);
+	font-size: 11.5px;
+	font-weight: 500;
+	line-height: 1.45;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	/* Balanced, not ragged: these labels are two or three words and wrap to two
+	   lines, and the browser's default break leaves a single orphaned word under
+	   a full line often enough to look like a mistake. */
+	text-wrap: balance;
+}
+
+.djo_conditions_more {
+	margin: clamp(34px, 4vw, 56px) 0 0;
+	text-align: center;
+}
+
+
+/* Signs and symptoms (front-page.php)
+   ------------------------------------------------------------
+   Photograph on one side, a numbered list of the signs on the other, and a
+   red-flag note under it that points away from this clinic and towards a
+   hospital.
+------------------------------------------------------------ */
+
+.djo_symptoms_layout {
+	display: grid;
+	grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+	gap: clamp(28px, 3.6vw, 56px);
+	align-items: start;
+}
+
+/* Sticky, so the photograph stays with the list while a visitor reads down it.
+   The offset clears the pinned header, which is the same measurement anchored
+   headings use. */
+.djo_symptoms_media {
+	position: sticky;
+	top: calc(var(--djo-header-h, 96px) + 24px);
+	overflow: hidden;
+	border-radius: var(--djo-radius);
+}
+
+.djo_symptoms_media img {
+	display: block;
+	width: 100%;
+	height: clamp(300px, 32vw, 430px);
+	object-fit: cover;
+}
+
+.djo_symptoms_list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	counter-reset: none;
+}
+
+/* A neutral chip, not white: the band under these is white now, and a white row
+   on a white ground is a row nobody can see. */
+.djo_symptoms_item {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	padding: 15px 20px;
+	border: 1px solid transparent;
+	border-radius: var(--djo-radius-sm);
+	background-color: var(--djo-chip);
+	transition: transform .25s ease, border-color .25s ease;
+}
+
+.djo_symptoms_item + .djo_symptoms_item {
+	margin-top: 8px;
+}
+
+.djo_symptoms_item:hover {
+	transform: translateX(4px);
+	border-color: var(--djo-rule);
+}
+
+/* The numeral is set in the brand blue at a size that lets the list be counted
+   at a glance. Fixed width so the text beside it starts on one line down the
+   column rather than stepping in at 07. */
+.djo_symptoms_num {
+	flex: 0 0 auto;
+	width: 32px;
+	color: var(--djo-blue-bright);
+	font-size: 17px;
+	font-weight: 700;
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+}
+
+.djo_symptoms_text {
+	color: var(--theme-color-title);
+	font-size: 15.5px;
+	line-height: 1.5;
+}
+
+/* The red-flag note. The clinic's red, used here and almost nowhere else -
+   which is the point: it is the one thing on the page that is not asking for a
+   booking, and it should not look like the rest. */
+.djo_symptoms_note {
+	display: flex;
+	align-items: flex-start;
+	gap: 14px;
+	margin: 26px 0 0;
+	padding: 18px 20px;
+	border-left: 3px solid var(--djo-red);
+	border-radius: var(--djo-radius-sm);
+	background-color: #FCEDED;
+	color: #7A1F26;
+	font-size: 14.5px;
+	line-height: 1.6;
+}
+
+.djo_symptoms_note strong {
+	color: var(--djo-red);
+}
+
+.djo_symptoms_note_icon {
+	display: inline-flex;
+	flex: 0 0 auto;
+	margin-top: 1px;
+	color: var(--djo-red);
+}
+
+.djo_symptoms_actions {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 14px 22px;
+	margin: 26px 0 0;
+}
+
+.djo_symptoms_phone {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--theme-color-title);
+	font-size: 15px;
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.djo_symptoms_phone svg {
+	color: var(--djo-blue);
+}
+
+.djo_symptoms_phone:hover {
+	color: var(--djo-blue);
+}
+
+
+/* ---------- Reviews ---------- */
 
 .djo_reviews_grid {
 	display: grid;
@@ -1196,15 +1752,19 @@ body.home .page_content_wrap {
 	box-shadow: var(--djo-shadow);
 }
 
-/* text-align is restated because the parent theme sets blockquotes right-
-   aligned - which is a reasonable look for a pull quote in an article and quite
-   wrong for three review cards, where it left every line ragged down the left
-   edge. The padding and border go for the same reason: this is a card, not the
-   theme's indented, ruled quotation. */
-.djo_review_text {
+/* The long selector is doing real work. The parent theme gives every
+   blockquote `padding: 3.2em 2.6em` - about 50px by 40px at this font size -
+   which is right for a pull quote set into an article and wrong inside a card
+   that already has padding of its own: it inset the quotation another 40px from
+   the stars above it and left the text floating in the middle of the card.
+   A bare `.djo_review_text` loses to it, so this matches on the element as well
+   as the class. The border and background go with it for the same reason. */
+.djo_reviews .djo_review blockquote.djo_review_text {
 	margin: 16px 0 0;
 	padding: 0;
 	border: none;
+	background: none;
+	overflow: visible;
 	text-align: left;
 	color: var(--theme-color-text);
 	font-size: 15.5px;
@@ -1238,9 +1798,7 @@ body.home .page_content_wrap {
 /* ---------- Call to action band ---------- */
 
 .djo_cta {
-	padding: clamp(52px, 6vw, 90px) 0;
-	background-color: var(--djo-navy);
-	color: #ffffff;
+	overflow: hidden;
 }
 
 .djo_cta_inner {
@@ -1270,19 +1828,7 @@ body.home .page_content_wrap {
 	gap: 14px;
 }
 
-/* On the dark band the solid blue button has almost nothing to separate it from
-   the navy behind it, so it inverts: white ground, navy label. */
-.djo_cta .djo_button_solid {
-	background-color: #ffffff;
-	color: var(--djo-navy);
-}
 
-.djo_cta .djo_button_solid:hover,
-.djo_cta .djo_button_solid:focus-visible {
-	background-color: rgba(255, 255, 255, 0.88);
-	color: var(--djo-navy) !important;
-	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
-}
 
 
 /* Speciality and Services pages
@@ -1307,7 +1853,7 @@ body.page-template-template-about .page_content_wrap {
 }
 
 .djo_page_hero {
-	padding: clamp(40px, 4vw, 64px) 0 clamp(28px, 3vw, 44px);
+	padding: clamp(40px, 4vw, 64px) 0 clamp(34px, 3.4vw, 52px);
 }
 
 .djo_page_hero .djo_head {
@@ -1347,7 +1893,7 @@ body.page-template-template-about .page_content_wrap {
 .djo_jump_link:hover,
 .djo_jump_link:focus-visible {
 	border-color: var(--djo-blue);
-	background-color: var(--djo-tint);
+	background-color: var(--djo-chip);
 	color: var(--djo-blue);
 }
 
@@ -1361,17 +1907,12 @@ body.page-template-template-about .page_content_wrap {
    Alternating tint rather than a rule between them: at this length a page of
    eight identical white blocks reads as one undifferentiated wall. */
 
-/* These sections sit inside the page container, not across the window, so the
-   tinted ones are rounded and inset rather than run to a hard square edge
-   partway across the screen. The horizontal padding is carried by both so the
-   text of a plain section and a tinted one still start on the same line. */
+/* Full-width bands, alternating light and dark down the page. The padding is
+   tighter than the home page's - there are eight of these in a row, and the
+   home page's rhythm over that many would make the page twice as long as it
+   needs to be. */
 .djo_entry {
-	padding: clamp(30px, 3.4vw, 48px) clamp(18px, 2.4vw, 40px);
-	border-radius: var(--djo-radius);
-}
-
-.djo_entry_alt {
-	background-color: var(--djo-tint);
+	padding: clamp(34px, 3.8vw, 56px) 0;
 }
 
 .djo_entry_inner {
@@ -1395,12 +1936,7 @@ body.page-template-template-about .page_content_wrap {
 	height: 62px;
 	padding: 12px;
 	border-radius: 50%;
-	background-color: #ffffff;
-	box-shadow: var(--djo-shadow);
-}
-
-.djo_entry_alt .djo_entry_icon {
-	background-color: #ffffff;
+	background-color: var(--djo-chip);
 }
 
 .djo_entry_title {
@@ -1546,10 +2082,6 @@ body.page-template-template-about .page_content_wrap {
 
 /* ---------- What we stand for ---------- */
 
-.djo_values {
-	background-color: var(--djo-tint);
-}
-
 .djo_values_grid,
 .djo_facilities_grid {
 	display: grid;
@@ -1575,7 +2107,7 @@ body.page-template-template-about .page_content_wrap {
 	height: 50px;
 	margin-bottom: 16px;
 	border-radius: 50%;
-	background-color: var(--djo-tint);
+	background-color: var(--djo-chip);
 	color: var(--djo-blue);
 }
 
@@ -1612,7 +2144,7 @@ body.page-template-template-about .page_content_wrap {
 .djo_facility_media {
 	display: block;
 	height: clamp(160px, 16vw, 220px);
-	background-color: var(--djo-tint);
+	background-color: var(--djo-chip);
 }
 
 .djo_facility_media img {
@@ -2020,8 +2552,12 @@ body.page-template-template-about .page_content_wrap {
 ------------------------------------------------------------ */
 
 .footer_jagadale {
-	--djo-footer-bg: #131C2F;
-	--djo-footer-text: #A7B0C2;
+	/* The same ground as the closing call to action above it, so the page darkens
+	   once and stays down rather than stepping back up for the small print. The
+	   two are told apart by the rule and the change of scale, not by a third
+	   shade of near-black. */
+	--djo-footer-bg: var(--djo-ink-deep);
+	--djo-footer-text: #9AA3B4;
 	--djo-footer-heading: #ffffff;
 	--djo-footer-rule: rgba(255, 255, 255, 0.12);
 	padding: 70px 0 40px;
@@ -2192,7 +2728,7 @@ body.page-template-template-about .page_content_wrap {
 	height: 28px;
 	border-radius: 50%;
 	background-color: rgba(255, 255, 255, 0.07);
-	color: var(--djo-blue-bright);
+	color: var(--djo-blue-pale);
 	transition: background-color .3s ease, color .3s ease, transform .3s ease;
 }
 
@@ -2207,7 +2743,7 @@ body.page-template-template-about .page_content_wrap {
 .footer_jagadale .djo_footer_contact:hover .djo_footer_contact_icon,
 .footer_jagadale .djo_footer_contact:focus-within .djo_footer_contact_icon {
 	transform: translateY(-1px);
-	background-color: var(--djo-blue-bright);
+	background-color: var(--djo-blue);
 	color: #ffffff;
 }
 
@@ -2294,19 +2830,40 @@ body.page-template-template-about .page_content_wrap {
 ------------------------------------------------------------ */
 
 @media (max-width: 1199px) {
-	.djo_mega_grid,
-	.djo_mega_services .djo_mega_grid {
+	.djo_mega_grid {
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
 	.djo_cards,
 	.djo_services_grid {
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 	}
+	/* Eight across stops working before the tablet breakpoint - the labels are
+	   two words and start breaking mid-word. Four and four, with the rule
+	   redrawn per row. */
+	.djo_rail {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		row-gap: 34px;
+	}
+	.djo_rail::before {
+		right: calc(100% / 8);
+		left: calc(100% / 8);
+	}
 }
 
 @media (max-width: 1023px) {
 	.djo_trust_grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	.djo_conditions_intro {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.djo_symptoms_layout {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	/* Nothing to stick to once the two columns stack - the image is above the
+	   list rather than beside it, so pinning it would park it over the list. */
+	.djo_symptoms_media {
+		position: static;
 	}
 	.djo_split {
 		grid-template-columns: minmax(0, 1fr);
@@ -2334,12 +2891,37 @@ body.page-template-template-about .page_content_wrap {
 }
 
 @media (max-width: 767px) {
+	/* Two across on a phone. The rule is dropped rather than redrawn: across
+	   four rows of two it stops reading as one line of stops and becomes four
+	   stray dashes. The dots stay - they are what tie the label to the icon. */
+	.djo_rail {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		row-gap: 28px;
+	}
+	.djo_rail::before {
+		display: none;
+	}
+	.djo_symptoms_item {
+		gap: 12px;
+		padding: 13px 15px;
+	}
+	.djo_symptoms_num {
+		width: 26px;
+		font-size: 15px;
+	}
 	.djo_cards,
 	.djo_services_grid,
 	.djo_values_grid,
 	.djo_facilities_grid,
 	.djo_reviews_grid {
 		grid-template-columns: minmax(0, 1fr);
+	}
+	/* Equal rows are what keeps a grid of cards from stepping. In one column
+	   every card is its own row, so the rule stops helping and starts hurting:
+	   it stretched all eight to the height of the wordiest one. */
+	.djo_cards,
+	.djo_services_grid {
+		grid-auto-rows: auto;
 	}
 	.djo_trust {
 		margin-top: 0;

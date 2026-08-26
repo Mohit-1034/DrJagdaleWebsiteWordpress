@@ -336,7 +336,8 @@ if ( ! function_exists( 'orto_child_render_group_page' ) ) {
 		);
 		?>
 
-		<section class="djo_page_hero">
+		<section class="djo_page_hero djo_band djo_band_light">
+			<div class="content_wrap">
 			<?php
 			orto_child_section_head(
 				array(
@@ -368,10 +369,20 @@ if ( ! function_exists( 'orto_child_render_group_page' ) ) {
 					<?php } ?>
 				</ul>
 			</nav>
+			</div>
 		</section>
 
 		<?php foreach ( $entries as $index => $entry ) { ?>
-			<section class="djo_entry<?php echo ( $index % 2 ) ? ' djo_entry_alt' : ''; ?>" id="<?php echo esc_attr( $entry['slug'] ); ?>">
+			<?php
+			/*
+			 * Alternating full-width bands, light and dark, all the way down the
+			 * page. Eight identical white blocks read as one undifferentiated
+			 * wall; alternating grounds give the reader a place in the list
+			 * without a single rule being drawn.
+			 */
+			?>
+			<section class="djo_entry djo_band <?php echo ( $index % 2 ) ? 'djo_band_dark' : 'djo_band_light'; ?>" id="<?php echo esc_attr( $entry['slug'] ); ?>">
+				<div class="content_wrap">
 				<div class="djo_entry_inner">
 
 					<div class="djo_entry_head">
@@ -405,6 +416,7 @@ if ( ! function_exists( 'orto_child_render_group_page' ) ) {
 						<?php } ?>
 					</p>
 
+				</div>
 				</div>
 			</section>
 		<?php } ?>

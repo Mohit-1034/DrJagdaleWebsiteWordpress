@@ -12,12 +12,18 @@
  * impose a 1/4 + 3/4 split the design does not use. The markup below is the
  * same three regions with none of that.
  *
- * The Speciality and Services items open full-width mega panels rather than
- * ordinary dropdowns. Those panels are rendered here, once, as siblings of the
- * bar - not inside the <nav>, because the parent theme's menu CSS gives every
- * descendant of a menu item absolute positioning and a fixed width, and a panel
- * that has to span the whole window cannot live inside a 220px column. They are
- * shown by js/mega-menu.js, and by :hover alone if that script never runs.
+ * The Speciality and Services items open mega panels rather than ordinary
+ * dropdowns. Those panels are rendered here, once, as siblings of the bar - not
+ * inside the <nav>, because the parent theme's menu CSS gives every descendant
+ * of a menu item absolute positioning and a fixed width, and a panel this wide
+ * cannot live inside a 220px column. They are shown by js/mega-menu.js.
+ *
+ * Each panel is a grid of destinations and nothing else: an icon and a name.
+ * It carried a bulleted list of every condition under every heading for a
+ * while, and that was a mistake - a menu is a set of doors, and printing the
+ * contents of each room on its door leaves a wall of text to be read before
+ * anything can be chosen. The detail belongs on the page behind the door, and
+ * that is where it now lives.
  *
  * Classes kept deliberately, because other code depends on them:
  *   .top_panel_navi                - js/header.js pins this on scroll
@@ -91,15 +97,13 @@ $orto_child_header_groups   = orto_child_get_nav_groups();
 
 	<?php
 	/*
-	 * The mega panels.
+	 * The mega panels: a compact grid of destinations, one per entry, each an
+	 * icon and a name. Both groups run eight entries, so both panels are the
+	 * same shape and the same height - the menu does not jump as the pointer
+	 * moves between Speciality and Services.
 	 *
-	 * Speciality is laid out as columns of conditions under a pill heading, the
-	 * way a patient scans for the part of them that hurts. Services is a two-up
-	 * grid of what the clinic does. Both are the reference layouts from the
-	 * brief's menu screenshots.
-	 *
-	 * Every heading is a real link to its section on the group's page, so the
-	 * panel is navigable with a keyboard and useful without JavaScript.
+	 * Every cell is a real link to its section on the group's page, so the panel
+	 * is navigable with a keyboard.
 	 */
 	?>
 	<?php foreach ( array( 'speciality', 'services' ) as $orto_child_mega_group ) { ?>
@@ -117,19 +121,12 @@ $orto_child_header_groups   = orto_child_get_nav_groups();
 			<div class="djo_mega_inner">
 				<div class="djo_mega_grid">
 					<?php foreach ( $orto_child_header_groups[ $orto_child_mega_group ] as $orto_child_mega_entry ) { ?>
-						<div class="djo_mega_col">
-							<a class="djo_mega_head" href="<?php echo esc_url( $orto_child_mega_url . '#' . $orto_child_mega_entry['slug'] ); ?>">
-								<span class="djo_mega_head_icon" aria-hidden="true">
-									<?php echo orto_child_menu_icon( $orto_child_mega_entry['icon'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-								</span>
-								<span class="djo_mega_head_pill"><?php echo esc_html( $orto_child_mega_entry['title'] ); ?></span>
-							</a>
-							<ul class="djo_mega_list">
-								<?php foreach ( $orto_child_mega_entry['items'] as $orto_child_mega_item ) { ?>
-									<li><a href="<?php echo esc_url( $orto_child_mega_url . '#' . $orto_child_mega_entry['slug'] ); ?>"><?php echo esc_html( $orto_child_mega_item ); ?></a></li>
-								<?php } ?>
-							</ul>
-						</div>
+						<a class="djo_mega_item" href="<?php echo esc_url( $orto_child_mega_url . '#' . $orto_child_mega_entry['slug'] ); ?>">
+							<span class="djo_mega_item_icon" aria-hidden="true">
+								<?php echo orto_child_menu_icon( $orto_child_mega_entry['icon'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							</span>
+							<span class="djo_mega_item_label"><?php echo esc_html( $orto_child_mega_entry['title'] ); ?></span>
+						</a>
 					<?php } ?>
 				</div>
 
