@@ -45,6 +45,12 @@ require_once get_stylesheet_directory() . '/inc/nav.php';
  */
 require_once get_stylesheet_directory() . '/inc/legal.php';
 
+/**
+ * The arrival loader: a full-screen overlay shown while the page paints.
+ * Self-contained - its CSS and its controller are inlined by that file.
+ */
+require_once get_stylesheet_directory() . '/inc/loader.php';
+
 
 /* ---------------------------------------------------------------------------
  * Business details
