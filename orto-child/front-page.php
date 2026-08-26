@@ -105,10 +105,14 @@ get_header();
 					<span class="djo_hero_rating_text">
 						<?php
 						printf(
-							/* translators: 1: rating out of five, 2: number of reviews. */
-							esc_html__( '%1$s from %2$s Google reviews', 'orto' ),
+							/* translators: 1: rating out of five, 2: number of reviews, 3: the Google mark followed by the words "Google reviews". */
+							esc_html__( '%1$s from %2$s %3$s', 'orto' ),
 							'<strong>' . esc_html( $djo_business['rating'] ) . '</strong>',
-							esc_html( $djo_business['rating_count'] )
+							'<strong>' . esc_html( $djo_business['rating_count'] ) . '</strong>',
+							'<span class="djo_hero_rating_source">'
+								. orto_child_icon( 'google' )
+								. esc_html__( 'Google reviews', 'orto' )
+								. '</span>'
 						);
 						?>
 					</span>
@@ -143,8 +147,8 @@ get_header();
 					<span class="djo_trust_label"><?php esc_html_e( 'Physiotherapy and rehabilitation', 'orto' ); ?></span>
 				</li>
 				<li class="djo_trust_item">
-					<span class="djo_trust_value"><?php echo '&#8377;' . esc_html( $djo_business['consult_fee'] ); ?></span>
-					<span class="djo_trust_label"><?php esc_html_e( 'Consultation, seven days a week', 'orto' ); ?></span>
+					<span class="djo_trust_value djo_trust_value_hours"><?php esc_html_e( '11am - 8pm', 'orto' ); ?></span>
+					<span class="djo_trust_label"><?php esc_html_e( 'Open seven days a week', 'orto' ); ?></span>
 				</li>
 			</ul>
 		</div>
@@ -463,12 +467,10 @@ get_header();
 				<p class="djo_reviews_count">
 					<strong><?php echo esc_html( $djo_business['rating'] ); ?></strong>
 					<?php
-					echo esc_html(
-						sprintf(
-							/* translators: %s: number of reviews. */
-							__( 'based on %s reviews', 'orto' ),
-							$djo_business['rating_count']
-						)
+					printf(
+						/* translators: %s: number of reviews. */
+						esc_html__( 'based on %s reviews', 'orto' ),
+						'<strong>' . esc_html( $djo_business['rating_count'] ) . '</strong>'
 					);
 					?>
 				</p>
