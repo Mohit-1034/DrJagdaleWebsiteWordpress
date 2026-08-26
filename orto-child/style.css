@@ -22,72 +22,88 @@ Template: orto
 
 /* Palette
    ------------------------------------------------------------
-   Two grounds and nothing between them: white and a near-black navy. The page
-   alternates between the two, full width, the whole way down.
+   The Orto skin's own scheme, used as shipped. The clinic-specific navy that
+   sat here before has been taken back out at the client's request.
 
-   The tinted blues that used to sit between them are gone. A #F1F4FA band next
-   to a white one is a difference you have to look for, so the page read as one
-   undifferentiated scroll with faint seams in it; and against the clinic's own
-   navy those tints made the whole site look washed out. White against near-black
-   is a difference nobody has to look for.
+   The site's own tokens are aliases of the theme's rather than copies of its
+   hex values, so a change of skin - or a colour picked in the Customizer -
+   carries the whole site with it instead of leaving these behind. Only the
+   handful of values the skin has no equivalent for are stated literally, and
+   each says below where it came from.
 
-   Where a surface still has to lift off its ground - an icon chip, a form field,
-   the hours card - it uses a neutral grey, never a blue one. The blue is kept
-   for the things that are actually blue: the brand, the links, the buttons and
-   the supplied icon set.
+   The skin, for reference:
+     bg_color      #F8F8F7   warm white, the light bands
+     bg_color_2    #F6F2EE   warm cream, chips and form fields
+     bd_color      #E9E2DB   hairlines
+     title         #3E4939   olive
+     text          #7E847B
+     meta          #ABAFA9
+     link/hover    #8BAE7E / #7BA16E   sage
+     alt_bg_color  #161716   near-black, the dark bands
+     alt_bd_color  #2D2B28
+     alt_title     #FFFEFE
+     alt_text      #B8BCC4
+     alt_meta      #A2A6AF
 
-   The parent skin sets its own tokens on `.scheme_default, body.scheme_default`
-   in skins/default/css/__custom.css, and `body.scheme_default` (0,1,1) outranks
-   a bare `:root` (0,1,0) - so an override written only on :root loses and the
-   theme's sage green comes back everywhere a --theme-color-* is read. Matching
-   the parent's own selector makes the two equal, and this stylesheet is
-   enqueued after theirs, so the later rule wins.
-
-   Contrast, against white:
-     --theme-color-title  #10192B  15.9:1
-     --theme-color-text   #454C59   8.4:1
-     --theme-color-link   #24407D  10.3:1
-   and against --djo-ink:
-     #ffffff              16.4:1
-     rgba(255,255,255,.78) ~10:1
+   NOTE ON THE PARENT'S SELECTOR. The skin sets these on
+   `.scheme_default, body.scheme_default`, and `body.scheme_default` (0,1,1)
+   outranks a bare `:root` (0,1,0). Anything added here has to match that
+   selector to win, which is why the block below is written the way it is even
+   though it no longer overrides any --theme-color-* at all.
 ------------------------------------------------------------ */
 
 :root,
 .scheme_default,
 body.scheme_default {
-	/* The two grounds. */
-	--djo-paper: #ffffff;
-	--djo-ink: #10192B;
-	/* One step deeper, for the closing call to action and the footer, so the
-	   page darkens towards its end rather than repeating one flat black. */
-	--djo-ink-deep: #080E1A;
+	/* The two grounds the page alternates between. */
+	--djo-paper: var(--theme-color-bg_color, #F8F8F7);
+	--djo-ink: var(--theme-color-alt_bg_color, #161716);
 
-	/* The brand blues. Accents only - no band is ever painted in these. */
-	--djo-blue: #24407D;
-	--djo-blue-bright: #4B5FA5; /* the supplied icon set's own line colour */
-	--djo-blue-pale: #9DB2E0;   /* for accents ON the dark bands only */
-	--djo-red: #C8202B;         /* the signage rule; an accent, never body copy */
+	/*
+	 * One step deeper than the skin's dark, for the footer. Stated literally
+	 * because the skin has only one dark and the page needs somewhere to
+	 * settle at the very bottom.
+	 */
+	--djo-ink-deep: #0D0D0C;
 
-	/* Neutral, not blue-grey. These are the only greys on the site. */
-	--djo-chip: #F3F4F6;        /* icon chips, form fields, quiet cards */
-	--djo-rule: #E3E5E9;        /* hairlines on white */
-	--djo-rule-dark: rgba(255, 255, 255, 0.14);
-	--djo-card-dark: rgba(255, 255, 255, 0.045);
+	/* The skin's sage, and two derived from it. */
+	--djo-green: var(--theme-color-link, #8BAE7E);
+	--djo-green-deep: var(--theme-color-hover, #7BA16E);
 
-	/* The parent skin's own tokens, redefined. */
-	--theme-color-bg_color: #ffffff;
-	--theme-color-bg_color_2: #F3F4F6;
-	--theme-color-bd_color: #E3E5E9;
-	--theme-color-title: #10192B;
-	--theme-color-text: #454C59;
-	--theme-color-meta: #6A7180;
-	--theme-color-link: #24407D;
-	--theme-color-hover: #10192B;
+	/*
+	 * The call-to-action band's ground. The skin's sage is too light to carry
+	 * white text - #8BAE7E against white is 2.5:1, nowhere near the 4.5:1 body
+	 * copy needs - so the band takes the same hue about forty per cent darker,
+	 * which clears 6:1. It is still unmistakably the brand green; it is simply
+	 * dark enough to be read off.
+	 */
+	--djo-accent: #4C6A44;
+
+	/*
+	 * Sage on near-black is legible but flat. This is the same hue lifted, for
+	 * the accents that sit ON the dark bands - ticks, figures, the surgeon's
+	 * credentials.
+	 */
+	--djo-green-pale: #B4CDA8;
+
+	/* Not a brand colour and deliberately not derived from one: this is the
+	   red-flag note on the symptoms section, and a warning that harmonises
+	   with the page is a warning nobody reads. */
+	--djo-red: #C8202B;
+
+	/* Surfaces that lift off their ground - icon chips, form fields, the hours
+	   card. The skin's own second background. */
+	--djo-chip: var(--theme-color-bg_color_2, #F6F2EE);
+	--djo-rule: var(--theme-color-bd_color, #E9E2DB);
+	--djo-rule-dark: var(--theme-color-alt_bd_color, #2D2B28);
+	--djo-card-dark: rgba(255, 255, 255, 0.05);
 
 	--djo-radius: 14px;
 	--djo-radius-sm: 10px;
-	--djo-shadow: 0 4px 20px rgba(16, 25, 43, 0.07);
-	--djo-shadow-lift: 0 16px 38px rgba(16, 25, 43, 0.14);
+	/* Shadows tinted with the skin's olive rather than neutral black, so they
+	   sit in the warm palette instead of greying it. */
+	--djo-shadow: 0 4px 20px rgba(62, 73, 57, 0.09);
+	--djo-shadow-lift: 0 16px 38px rgba(62, 73, 57, 0.16);
 }
 
 
@@ -191,7 +207,7 @@ body.scheme_default {
 .djo_band_dark .djo_button_solid::before,
 .djo_band_deep .djo_button_solid::before,
 .djo_band_accent .djo_button_solid::before {
-	background: linear-gradient(100deg, transparent, rgba(16, 25, 43, 0.16), transparent);
+	background: linear-gradient(100deg, transparent, rgba(22, 23, 22, 0.16), transparent);
 }
 
 /* The icon inside any button leans towards where the button goes. */
@@ -286,9 +302,9 @@ body.scheme_default {
    entirely, so it can never be the band that breaks the rhythm no matter what
    precedes it. */
 .djo_band_accent {
-	--djo-band-bg: var(--djo-blue);
-	background-color: var(--djo-blue);
-	color: rgba(255, 255, 255, 0.86);
+	--djo-band-bg: var(--djo-accent);
+	background-color: var(--djo-accent);
+	color: rgba(255, 255, 255, 0.88);
 }
 
 /* ---------- What a dark band does to everything inside it ----------
@@ -296,16 +312,34 @@ body.scheme_default {
    its own. Any section can be flipped by changing one class in the template and
    everything in it follows. */
 
+/*
+ * The skin ships its own scheme for dark grounds - alt_title, alt_text,
+ * alt_meta, alt_bd_color - so a dark band adopts those rather than inventing
+ * translucent whites. The accent band is dark enough to take the same set.
+ *
+ * The chip stays a translucent white: alt_bg_color is the band's own ground,
+ * so a chip painted in it would be invisible.
+ */
 .djo_band_dark,
 .djo_band_deep,
 .djo_band_accent {
 	--djo-rule: var(--djo-rule-dark);
-	--theme-color-bd_color: rgba(255, 255, 255, 0.14);
-	--theme-color-title: #ffffff;
-	--theme-color-text: rgba(255, 255, 255, 0.78);
-	--theme-color-meta: rgba(255, 255, 255, 0.55);
+	--theme-color-bd_color: var(--djo-rule-dark);
+	--theme-color-title: #FFFEFE;
+	--theme-color-text: #B8BCC4;
+	--theme-color-meta: #A2A6AF;
 	--djo-chip: rgba(255, 255, 255, 0.07);
 	--djo-shadow: none;
+}
+
+/* The accent band's ground is a mid green, not a near-black, so its hairlines
+   and text need to be lighter than the skin's dark-scheme values to separate
+   from it. */
+.djo_band_accent {
+	--djo-rule: rgba(255, 255, 255, 0.24);
+	--theme-color-bd_color: rgba(255, 255, 255, 0.24);
+	--theme-color-text: rgba(255, 255, 255, 0.88);
+	--theme-color-meta: rgba(255, 255, 255, 0.7);
 }
 
 .djo_band_dark .djo_eyebrow,
@@ -422,7 +456,7 @@ body.scheme_default {
 .djo_band_deep .djo_split_facts svg,
 .djo_band_deep .djo_entry_tick,
 .djo_band_deep .djo_entry_phone svg {
-	color: var(--djo-blue-pale);
+	color: var(--djo-green-pale);
 }
 
 /* Same for the surfaces those accents sat on. */
@@ -475,7 +509,7 @@ body.scheme_default {
 .djo_eyebrow {
 	display: block;
 	margin-bottom: 14px;
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 	font-size: 13px;
 	font-weight: 600;
 	line-height: 1;
@@ -556,7 +590,7 @@ body.scheme_default {
 }
 
 .djo_button_solid {
-	background-color: var(--djo-blue);
+	background-color: var(--djo-green-deep);
 	color: #ffffff;
 }
 
@@ -565,7 +599,7 @@ body.scheme_default {
 	transform: translateY(-3px);
 	background-color: var(--djo-ink);
 	color: #ffffff !important;
-	box-shadow: 0 8px 20px rgba(27, 42, 74, 0.32);
+	box-shadow: 0 8px 20px rgba(62, 73, 57, 0.32);
 }
 
 .djo_button_outline {
@@ -576,9 +610,9 @@ body.scheme_default {
 
 .djo_button_outline:hover,
 .djo_button_outline:focus-visible {
-	border-color: var(--djo-blue);
+	border-color: var(--djo-green-deep);
 	background-color: var(--djo-chip);
-	color: var(--djo-blue) !important;
+	color: var(--djo-green-deep) !important;
 }
 
 /* For use on the dark bands only - a transparent button with a white edge. */
@@ -601,7 +635,7 @@ body.scheme_default {
 .djo_stars {
 	display: inline-flex;
 	gap: 2px;
-	color: rgba(27, 42, 74, 0.18);
+	color: rgba(62, 73, 57, 0.18);
 }
 
 .djo_star_on {
@@ -818,12 +852,12 @@ body.scheme_default {
 	height: 38px;
 	border-radius: 50%;
 	background-color: var(--djo-chip);
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 	transition: background-color .3s ease, color .3s ease;
 }
 
 .djo_bar_phone:hover .djo_bar_phone_icon {
-	background-color: var(--djo-blue);
+	background-color: var(--djo-green-deep);
 	color: #ffffff;
 }
 
@@ -895,7 +929,7 @@ body.scheme_default {
 	right: clamp(10px, 1.4vw, 20px);
 	left: clamp(10px, 1.4vw, 20px);
 	margin: 0;
-	box-shadow: 0 12px 34px rgba(27, 42, 74, 0.14);
+	box-shadow: 0 12px 34px rgba(62, 73, 57, 0.16);
 	animation: djo_header_drop .4s ease both;
 }
 
@@ -1046,7 +1080,7 @@ body.home.djo_header_stuck .top_panel_default {
 .djo_mega_item:focus-visible {
 	border-color: var(--djo-rule);
 	background-color: var(--djo-chip);
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 }
 
 .djo_mega_item_icon {
@@ -1094,7 +1128,7 @@ body.home.djo_header_stuck .top_panel_default {
 	align-items: center;
 	gap: 8px;
 	flex: 0 0 auto;
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 	font-size: 14px;
 	font-weight: 600;
 	text-decoration: none;
@@ -1218,11 +1252,11 @@ body.home .page_content_wrap {
 	inset: 0;
 	background:
 		linear-gradient(100deg,
-			#131F3A 0%,
-			#131F3A 44%,
-			rgba(19, 31, 58, 0.86) 62%,
-			rgba(19, 31, 58, 0.55) 100%),
-		rgba(15, 25, 46, 0.25);
+			#1F201E 0%,
+			#1F201E 44%,
+			rgba(31, 32, 30, 0.86) 62%,
+			rgba(31, 32, 30, 0.55) 100%),
+		rgba(22, 23, 22, 0.25);
 }
 
 .djo_hero .content_wrap {
@@ -1411,7 +1445,7 @@ body.home .page_content_wrap {
 }
 
 .djo_trust_value {
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 	font-size: clamp(22px, 2.2vw, 30px);
 	font-weight: 700;
 	line-height: 1.1;
@@ -1558,7 +1592,7 @@ body.home .page_content_wrap {
 
 .djo_split_creds {
 	margin: 0 0 22px;
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 	font-size: 15px;
 	font-weight: 600;
 }
@@ -1587,7 +1621,7 @@ body.home .page_content_wrap {
 .djo_split_facts svg {
 	flex: 0 0 auto;
 	margin-top: 2px;
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 }
 
 .djo_split_actions {
@@ -1649,7 +1683,7 @@ body.home .page_content_wrap {
 }
 
 .djo_service_title a:hover {
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 }
 
 .djo_service_text {
@@ -1771,7 +1805,7 @@ body.home .page_content_wrap {
 	height: 11px;
 	margin-bottom: 16px;
 	border-radius: 50%;
-	background-color: var(--djo-blue-bright);
+	background-color: var(--djo-green-deep);
 	/* The ring is the band's own ground, read from --djo-band-bg: it exists to
 	   punch a hole in the rule drawn behind the dot, and a ring in any other
 	   colour shows as a halo. Reading the variable means the dot follows if the
@@ -1864,7 +1898,7 @@ body.home .page_content_wrap {
 .djo_symptoms_num {
 	flex: 0 0 auto;
 	width: 32px;
-	color: var(--djo-blue-bright);
+	color: var(--djo-green-deep);
 	font-size: 17px;
 	font-weight: 700;
 	line-height: 1;
@@ -1924,11 +1958,11 @@ body.home .page_content_wrap {
 }
 
 .djo_symptoms_phone svg {
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 }
 
 .djo_symptoms_phone:hover {
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 }
 
 
@@ -2126,7 +2160,7 @@ body.home .page_content_wrap {
 
 .djo_review:hover .djo_review_avatar {
 	transform: scale(1.08);
-	background-color: var(--djo-blue-pale);
+	background-color: var(--djo-green-pale);
 	color: var(--djo-ink);
 }
 
@@ -2304,9 +2338,9 @@ body.page-template-template-about .page_content_wrap {
 
 .djo_jump_link:hover,
 .djo_jump_link:focus-visible {
-	border-color: var(--djo-blue);
+	border-color: var(--djo-green-deep);
 	background-color: var(--djo-chip);
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 }
 
 .djo_jump_icon {
@@ -2395,7 +2429,7 @@ body.page-template-template-about .page_content_wrap {
 	display: inline-flex;
 	flex: 0 0 auto;
 	margin-top: 1px;
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 }
 
 .djo_entry_tick svg {
@@ -2422,11 +2456,11 @@ body.page-template-template-about .page_content_wrap {
 }
 
 .djo_entry_phone svg {
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 }
 
 .djo_entry_phone:hover {
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 }
 
 
@@ -2468,7 +2502,7 @@ body.page-template-template-about .page_content_wrap {
 .djo_timeline_year {
 	flex: 0 0 auto;
 	width: 72px;
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 	font-size: 19px;
 	font-weight: 700;
 }
@@ -2520,7 +2554,7 @@ body.page-template-template-about .page_content_wrap {
 	margin-bottom: 16px;
 	border-radius: 50%;
 	background-color: var(--djo-chip);
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 }
 
 .djo_value_icon svg {
@@ -2988,7 +3022,7 @@ body.page-template-template-about .page_content_wrap {
 	left: clamp(8px, 0.9vw, 16px);
 	height: 2px;
 	border-radius: 2px;
-	background-color: var(--djo-blue);
+	background-color: var(--djo-green-deep);
 	transform: scaleX(0);
 	transform-origin: right center;
 	transition: transform var(--djo-base) var(--djo-ease);
@@ -3053,7 +3087,7 @@ body.page-template-template-about .page_content_wrap {
 	left: 0;
 	width: 2px;
 	border-radius: 2px;
-	background-color: var(--djo-blue);
+	background-color: var(--djo-green-deep);
 	transform: scaleY(0);
 	transform-origin: center bottom;
 	transition: transform var(--djo-fast) var(--djo-ease);
@@ -3127,7 +3161,7 @@ body.page-template-template-about .page_content_wrap {
 	bottom: 0;
 	left: 0;
 	height: 3px;
-	background-color: var(--djo-blue);
+	background-color: var(--djo-green-deep);
 	transform: scaleX(0);
 	transition: transform var(--djo-base) var(--djo-ease);
 }
@@ -3156,7 +3190,7 @@ body.page-template-template-about .page_content_wrap {
 .djo_card_link:hover .djo_card_icon,
 .djo_card_link:focus-visible .djo_card_icon {
 	transform: rotate(-10deg) scale(1.12);
-	background-color: var(--djo-blue);
+	background-color: var(--djo-green-deep);
 }
 
 .djo_card_link:hover .djo_icon,
@@ -3169,11 +3203,11 @@ body.page-template-template-about .page_content_wrap {
 }
 
 .djo_card_link:hover .djo_card_title {
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 }
 
 .djo_band_dark .djo_card_link:hover .djo_card_title {
-	color: var(--djo-blue-pale);
+	color: var(--djo-green-pale);
 }
 
 /* ---------- Split: the surgeon band ---------- */
@@ -3217,7 +3251,7 @@ body.page-template-template-about .page_content_wrap {
 
 .djo_rail_item:hover .djo_rail_dot {
 	transform: scale(1.55);
-	background-color: var(--djo-blue);
+	background-color: var(--djo-green-deep);
 }
 
 .djo_rail_label {
@@ -3225,7 +3259,7 @@ body.page-template-template-about .page_content_wrap {
 }
 
 .djo_rail_item:hover .djo_rail_label {
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 }
 
 .djo_conditions_media img {
@@ -3283,7 +3317,7 @@ body.page-template-template-about .page_content_wrap {
 	bottom: 0;
 	left: 0;
 	width: 3px;
-	background-color: var(--djo-blue);
+	background-color: var(--djo-green-deep);
 	transform: scaleY(0);
 	transform-origin: center bottom;
 	transition: transform var(--djo-base) var(--djo-ease);
@@ -3428,11 +3462,11 @@ body.page-template-template-about .page_content_wrap {
 }
 
 .djo_facility:hover .djo_facility_title {
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 }
 
 .djo_band_dark .djo_facility:hover .djo_facility_title {
-	color: var(--djo-blue-pale);
+	color: var(--djo-green-pale);
 }
 
 /* ---------- Contact page ---------- */
@@ -3453,7 +3487,7 @@ body.page-template-template-about .page_content_wrap {
 
 .contact_page .contact_details_item:hover .contact_details_icon {
 	transform: rotate(-10deg) scale(1.1);
-	background-color: var(--djo-blue);
+	background-color: var(--djo-green-deep);
 	color: #ffffff;
 }
 
@@ -3466,7 +3500,7 @@ body.page-template-template-about .page_content_wrap {
 }
 
 .contact_page .contact_hours_item:hover .contact_hours_label {
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 }
 
 .contact_page .contact_social_link {
@@ -3497,13 +3531,13 @@ body.page-template-template-about .page_content_wrap {
 
 .contact_form_wrap .contact_form_row input:hover,
 .contact_form_wrap .contact_form_row textarea:hover {
-	border-color: var(--djo-blue-bright);
+	border-color: var(--djo-green-deep);
 }
 
 .contact_form_wrap .contact_form_row input:focus,
 .contact_form_wrap .contact_form_row textarea:focus {
-	border-color: var(--djo-blue);
-	box-shadow: 0 0 0 3px rgba(36, 64, 125, 0.14);
+	border-color: var(--djo-green-deep);
+	box-shadow: 0 0 0 3px rgba(123, 161, 110, 0.28);
 }
 
 /* The label rises with its field, so the pair reads as one control. */
@@ -3512,7 +3546,7 @@ body.page-template-template-about .page_content_wrap {
 }
 
 .contact_form_wrap .contact_form_row:focus-within label {
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 }
 
 .contact_page .contact_map_frame {
@@ -3572,7 +3606,7 @@ body.page-template-template-about .page_content_wrap {
 .footer_jagadale .djo_footer_social:focus-visible {
 	transform: translateY(-4px) rotate(-10deg);
 	border-color: transparent;
-	background-color: var(--djo-blue);
+	background-color: var(--djo-green-deep);
 	color: #ffffff;
 }
 
@@ -3628,7 +3662,7 @@ body.page-template-template-about .page_content_wrap {
 	   two are told apart by the rule and the change of scale, not by a third
 	   shade of near-black. */
 	--djo-footer-bg: var(--djo-ink-deep);
-	--djo-footer-text: #9AA3B4;
+	--djo-footer-text: #A2A6AF;
 	--djo-footer-heading: #ffffff;
 	--djo-footer-rule: rgba(255, 255, 255, 0.12);
 	padding: 70px 0 40px;
@@ -3799,7 +3833,7 @@ body.page-template-template-about .page_content_wrap {
 	height: 28px;
 	border-radius: 50%;
 	background-color: rgba(255, 255, 255, 0.07);
-	color: var(--djo-blue-pale);
+	color: var(--djo-green-pale);
 	transition: background-color .3s ease, color .3s ease, transform .3s ease;
 }
 
@@ -3814,7 +3848,7 @@ body.page-template-template-about .page_content_wrap {
 .footer_jagadale .djo_footer_contact:hover .djo_footer_contact_icon,
 .footer_jagadale .djo_footer_contact:focus-within .djo_footer_contact_icon {
 	transform: translateY(-1px);
-	background-color: var(--djo-blue);
+	background-color: var(--djo-green-deep);
 	color: #ffffff;
 }
 
@@ -3880,11 +3914,21 @@ body.page-template-template-about .page_content_wrap {
 	transition: opacity var(--djo-fast) var(--djo-ease);
 }
 
+/* Sized by height so the lockup keeps its proportions whatever file is in
+   place. 22px puts the wordmark on about the same optical weight as the
+   copyright line it sits under - a credit that out-shouts the client's own
+   small print is a credit in the wrong place. */
 .footer_jagadale .djo_footer_credit_link img {
 	display: block;
 	width: auto;
-	height: 20px;
-	transition: transform var(--djo-base) var(--djo-spring);
+	height: 22px;
+	opacity: 0.85;
+	transition: opacity var(--djo-fast) var(--djo-ease), transform var(--djo-base) var(--djo-spring);
+}
+
+.footer_jagadale .djo_footer_credit_link:hover img,
+.footer_jagadale .djo_footer_credit_link:focus-visible img {
+	opacity: 1;
 }
 
 .footer_jagadale .djo_footer_credit_name {
@@ -3894,9 +3938,12 @@ body.page-template-template-about .page_content_wrap {
 	letter-spacing: 0.01em;
 }
 
+/* No rotation here. That was written when this was a square mark on its own;
+   applied to a lockup it tips the wordmark off its baseline and reads as a
+   mistake. A lift is enough. */
 .footer_jagadale .djo_footer_credit_link:hover img,
 .footer_jagadale .djo_footer_credit_link:focus-visible img {
-	transform: rotate(-10deg) scale(1.1);
+	transform: translateY(-2px);
 }
 
 /* ---------- Bottom bar ---------- */
@@ -4215,7 +4262,7 @@ body.page-template-template-about .page_content_wrap {
 .djo_legal_toc_list a::before {
 	content: counter(djo-toc, decimal-leading-zero);
 	flex: 0 0 auto;
-	color: var(--djo-blue-bright);
+	color: var(--djo-green-deep);
 	font-weight: 700;
 	font-variant-numeric: tabular-nums;
 }
@@ -4223,7 +4270,7 @@ body.page-template-template-about .page_content_wrap {
 .djo_legal_toc_list a:hover,
 .djo_legal_toc_list a:focus-visible {
 	transform: translateX(3px);
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 }
 
 .djo_legal_body {
@@ -4264,7 +4311,7 @@ body.page-template-template-about .page_content_wrap {
 
 .djo_legal_number {
 	flex: 0 0 auto;
-	color: var(--djo-blue-bright);
+	color: var(--djo-green-deep);
 	font-size: 15px;
 	font-weight: 700;
 	font-variant-numeric: tabular-nums;
@@ -4284,7 +4331,7 @@ body.page-template-template-about .page_content_wrap {
 }
 
 .djo_legal_section a {
-	color: var(--djo-blue);
+	color: var(--djo-green-deep);
 	text-decoration: underline;
 	text-underline-offset: 2px;
 }
@@ -4311,7 +4358,7 @@ body.page-template-template-about .page_content_wrap {
 	width: 6px;
 	height: 6px;
 	border-radius: 50%;
-	background-color: var(--djo-blue-bright);
+	background-color: var(--djo-green-deep);
 }
 
 .djo_legal_list strong {

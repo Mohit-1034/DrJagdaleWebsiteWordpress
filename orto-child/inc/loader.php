@@ -155,10 +155,10 @@ if ( ! function_exists( 'orto_child_loader_styles' ) ) {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background-color: #ffffff;
+	background-color: #F8F8F7;
 	/* One very faint cool wash behind the mark, so the ground has a centre
 	   rather than being a flat sheet. Barely there on purpose. */
-	background-image: radial-gradient(100% 70% at 50% 44%, rgba(75, 95, 165, 0.06) 0%, rgba(255, 255, 255, 0) 62%);
+	background-image: radial-gradient(100% 70% at 50% 44%, rgba(123, 161, 110, 0.07) 0%, rgba(248, 248, 247, 0) 62%);
 	opacity: 1;
 	/* Its own layer for its short life: the exit animates opacity over a
 	   full-screen element, and without this the browser repaints everything
@@ -205,7 +205,14 @@ html.doc-jagadale-loader-locked body {
 
    The proportions are the point: the shaft is slim, the ends are round, and
    the pivot is wider than either shaft - which is roughly how a condyle sits
-   against a shaft, and is what stops the pair reading as two sticks. */
+   against a shaft, and is what stops the pair reading as two sticks.
+
+   The colours are literal rather than custom properties: this paints before
+   the theme's stylesheet has been parsed, so there is no --theme-color-* to
+   read yet. They are the skin's own sage, with the fixed bone and the pivot in
+   the deeper #4C6A44 the call-to-action band uses - the skin's sage alone is
+   about 2.5:1 on its warm white, which is fine for a link and thin for the only
+   mark on the screen. Keep them in step by hand if the skin ever changes. */
 .doc-jagadale-loader-joint {
 	position: relative;
 	width: 88px;
@@ -222,7 +229,7 @@ html.doc-jagadale-loader-locked body {
 	   ends are properly round, which is what makes it read as bone rather
 	   than as a rounded rectangle. */
 	border-radius: 6px / 10px;
-	background-color: #24407D;
+	background-color: #4C6A44;
 }
 
 /* The femur, above the joint, fixed. */
@@ -235,7 +242,7 @@ html.doc-jagadale-loader-locked body {
    about its own middle. */
 .doc-jagadale-loader-bone-lower {
 	top: 62px;
-	background-color: #4B5FA5;
+	background-color: #7BA16E;
 	transform-origin: 50% 5px;
 	animation: doc-jagadale-loader-flex 1.75s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
@@ -265,7 +272,7 @@ html.doc-jagadale-loader-locked body {
 	height: 23px;
 	margin-left: -11.5px;
 	border-radius: 50%;
-	background-color: #24407D;
+	background-color: #4C6A44;
 }
 
 /* A hairline ring around the joint, breathing very slightly in time with the
@@ -274,7 +281,7 @@ html.doc-jagadale-loader-locked body {
 	content: "";
 	position: absolute;
 	inset: -8px;
-	border: 1.5px solid rgba(75, 95, 165, 0.45);
+	border: 1.5px solid rgba(123, 161, 110, 0.5);
 	border-radius: 50%;
 	animation: doc-jagadale-loader-pulse 1.75s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
@@ -290,7 +297,7 @@ html.doc-jagadale-loader-locked body {
    joint above it. */
 .doc-jagadale-loader-tagline {
 	margin: 30px 0 0;
-	color: #6A7180;
+	color: #7E847B;
 	font-size: clamp(10px, 1.2vw, 12px);
 	font-weight: 600;
 	line-height: 1.4;
@@ -310,14 +317,14 @@ html.doc-jagadale-loader-locked body {
 	margin-top: 20px;
 	overflow: hidden;
 	border-radius: 2px;
-	background-color: #E3E5E9;
+	background-color: #E9E2DB;
 }
 
 .doc-jagadale-loader-bar {
 	position: absolute;
 	inset: 0;
 	border-radius: 2px;
-	background: linear-gradient(90deg, #4B5FA5, #24407D);
+	background: linear-gradient(90deg, #8BAE7E, #7BA16E);
 	transform-origin: left center;
 	transform: scaleX(var(--doc-jagadale-loader-progress, 0));
 	transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
