@@ -13,7 +13,7 @@
  *   4. About         - the surgeon, briefly, with the credentials that matter.
  *   5. Conditions    - "what is it called", for the visitor who arrives with a
  *                     diagnosis rather than a symptom.
- *   6. Services      - what the clinic can do about it, all under one roof.
+ *   6. Services      - what the clinic can do about it, all under one roof. 
  *   7. Symptoms      - when it is worth coming in at all, and when to go
  *                     straight to a hospital instead.
  *   8. Reviews       - other patients saying it, which carries further than we can.
